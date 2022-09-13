@@ -11,13 +11,21 @@ Created on Fri Sep  9 16:20:34 2022
 import numpy as np
 import pandas as pd
 import pathlib
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 
 class Node:
+    """
+    
+    """
     def __init__ (self, value, label):
+        """
+        
+
+        :param value: TYPE. DESCRIPTION.
+        :param label: TYPE. DESCRIPTION.
+
+        return None.
+        """
         self.split = None
         self.left = None
         self.right = None
@@ -25,14 +33,36 @@ class Node:
         self.label = label
     
     def tree_update (self, split, left, right):
+        """
+        
+        
+        :param split: TYPE. DESCRIPTION.
+        :param left: TYPE. DESCRIPTION.
+        :param right: TYPE. DESCRIPTION.
+
+        return None.
+        """
         self.split = split
         self.left = left
         self.right = right
-    def label_len (self):
-        return len(self.label)
     def Gini_impurity (self):
+        """
+        
+
+        return TYPE. DESCRIPTION.
+        """
         return (sum(self.label)/len(self.label)) * (1-(sum(self.label)/len(self.label)))
     def split_tree(self, minleaf, nfeat):
+        """
+        
+
+        :param minleaf: TYPE. DESCRIPTION.
+        :param nfeat: TYPE. DESCRIPTION.
+
+        return split: TYPE. DESCRIPTION.
+        return left: TYPE. DESCRIPTION.
+        return right: TYPE. DESCRIPTION.
+        """
         i_temp = 0
         thre_temp = 0
         reduction_temp = 0
@@ -60,8 +90,8 @@ class Node:
         left = Node(self.value[index_big], self.label[index_big])
         right = Node(self.value[index_small], self.label[index_small])  
         return split, left, right
-    
-    
+
+  
 def tree_grow (x, y, nmin = None, minleaf = None, nfeat = None):
     """
     This function is used to grow a classification tree.
@@ -83,14 +113,13 @@ def tree_grow (x, y, nmin = None, minleaf = None, nfeat = None):
     nodes.append(root)
     while nodes:
         node = nodes.pop()
-        if node.Gini_impurity() > 0 and node.label_len() >= nmin:
+        if node.Gini_impurity() > 0 and len(node.label) >= nmin:
             split, left, right = node.split_tree(minleaf, nfeat)
             if left != None:
                 node.tree_update(split, left, right)
                 nodes.append(left)
                 nodes.append(right)
     return root    
-
 
 def tree_pred (x, tr):
     """
@@ -134,7 +163,7 @@ def tree_grow_b (x, y, nmin = None, minleaf = None, nfeat = None, m = None):
     """
     tree_list = []
     for i in range(m):
-        index = np.random.choice(range(np.size(y)), size=np.size(y))
+        index = np.random.choice(range(len(y)), size=len(y))
         tree_list.append(tree_grow(x[index], y[index], nmin, minleaf, nfeat))
     return tree_list
 
@@ -166,98 +195,102 @@ def tree_pred_b (x, trs):
         ys.append(max(set(y), key=y.count))
     return ys
 
-
-
-def test_credit_data():
-    path = pathlib.Path(r"credit.txt")
-    df = pd.read_csv(path)
-    x_train, x_val ,y_train , y_val = train_test_split(df[['age','married','house','income', 'gender']].values,df.label.values, test_size=0.10)
-    print("\n", df)
-    print("\ntest data:", x_val, y_val)
-    print()
-    
-    nmin = 1
-    minleaf = 1
-    nfeat = len(x_train[0, :])
-    tree = tree_grow(x_train,y_train, nmin, minleaf, nfeat)
-    y_pred = tree_pred(x_val, tree)
-    print("predicted:", y_pred)
-    print("real:", y_val)
-    
-    m = 100
-    tree = tree_grow_b(x_train,y_train, nmin, minleaf, nfeat, m)
-    y_pred = tree_pred_b(x_val, tree)
-    print("\npredicted:", y_pred)
-    print("real:", y_val)
-
-    m = 100
-    nfeat = 2       
-    tree = tree_grow_b(x_train,y_train, nmin, minleaf, nfeat, m)
-    y_pred = tree_pred_b(x_val, tree)
-    print("\npredicted:", y_pred)
-    print("real:", y_val)
-
 def data_analysis(actual, predict):
     """
     This function is used to compute and print the accuracy, precision and recall of the result.
+    
     :param actual: numpy.ndarray. The acutual labels of the test set.
     :param predict: numpy.ndarray. The predicted labels of the test set.
-
-    return 
     """
 
     acc = accuracy_score(actual, predict)
-    print("Accuracy:",acc)
+    print("Accuracy:", acc)
     p = precision_score(actual, predict)
-    print("Precision:",p)
+    print("Precision:", p)
     r = recall_score(actual, predict)
-    print("Recall:",r)
+    print("Recall:", r)
 
     cm = confusion_matrix(actual, predict)
     print("Confusion Matrix:")
     print(cm)
 
-# test_credit_data()
+def data_preparation(path_1, path_2, metric_list, columns_list, columns_name):
+    """
+    
 
-#read data from the  csv file
-train_data = pd.read_csv("eclipse-metrics-packages-2.0.csv",sep=";")
-test_data = pd.read_csv("eclipse-metrics-packages-3.0.csv",sep=";")
+    :param path_1: TYPE. DESCRIPTION.
+    :param path_2: TYPE. DESCRIPTION.
+    :param metric_list: TYPE. DESCRIPTION.
+    :param columns_list: TYPE. DESCRIPTION.
+    :param columns_name: TYPE. DESCRIPTION.
 
-# get pre-release bugs and 
-# FOUT MLOC NBD PAR VG NOF NOM NSF NSM ACD NOI NOT TLOC(*3) + NOCU (*1) + pre-release bugs = 41 predictor variables
-metric_list = ["FOUT", "MLOC", "NBD", "PAR", "VG", "NOF", "NOM", "NSF", "NSM", "ACD", "NOI", "NOT", "TLOC", "NOCU"]
-columns_list = ["pre"]
-for j in metric_list:
-  for i in train_data.columns:
-    if j in i:
-      columns_list.append(i)
+    return train_data_x: TYPE. DESCRIPTION.
+    return train_data_y: TYPE. DESCRIPTION.
+    return test_data_x: TYPE. DESCRIPTION.
+    return test_data_y: TYPE. DESCRIPTION.
 
-train_data_x = train_data[columns_list]
-train_data_y = train_data["post"]
-train_data_y[train_data_y>0] = 1
-# change DataFrame into np.array
-train_data_x = np.array(train_data_x)
-train_data_y = np.array(train_data_y)
+    """
+    #read data from the  csv file
+    path_1 = pathlib.Path(r"Data/eclipse-metrics-packages-2.0.csv")
+    path_2 = pathlib.Path(r"Data/eclipse-metrics-packages-3.0.csv")
+    train_data = pd.read_csv(path_1, sep=";")
+    test_data = pd.read_csv(path_2,sep=";")
+    
+    # get pre-release bugs and 
+    # FOUT MLOC NBD PAR VG NOF NOM NSF NSM ACD NOI NOT TLOC(*3) + NOCU (*1) + pre-release bugs = 41 predictor variables
+    for j in metric_list:
+      for i in train_data.columns:
+        if j in i:
+          columns_list.append(i)
+    
+    train_data_x = train_data[columns_list]
+    train_data.loc[train_data[columns_name] > 0, columns_name] = 1
+    train_data_y = train_data[columns_name]
+    # change DataFrame into np.array
+    train_data_x = np.array(train_data_x)
+    train_data_y = np.array(train_data_y)
+    
+    test_data_x = test_data[columns_list]
+    test_data.loc[test_data[columns_name] > 0, columns_name] = 1
+    test_data_y = test_data[columns_name]
+    # change DataFrame into np.array
+    test_data_x = np.array(test_data_x)
+    test_data_y = np.array(test_data_y)
+    return train_data_x, train_data_y, test_data_x, test_data_y
 
-test_data_x = test_data[columns_list]
-test_data_y = test_data["post"]
-test_data_y[test_data_y>0] = 1
-# change DataFrame into np.array
-test_data_x = np.array(test_data_x)
-test_data_y = np.array(test_data_y)
 
-# Part 2.1
-clf_1 = tree_grow(train_data_x,train_data_y,nmin = 15, minleaf = 5, nfeat = 41)
-res_y_1 = tree_pred(test_data_x,clf_1)
-print("Part 2.1")
-data_analysis(test_data_y,res_y_1)
+if __name__ == '__main__':
+    path_1 = pathlib.Path(r"Data/eclipse-metrics-packages-2.0.csv")
+    path_2 = pathlib.Path(r"Data/eclipse-metrics-packages-3.0.csv")
+    metric_list = ["FOUT", "MLOC", "NBD", "PAR", "VG", "NOF", "NOM", "NSF", "NSM", "ACD", "NOI", "NOT", "TLOC", "NOCU"]
+    x_train, y_train, x_test, y_test = data_preparation(path_1, path_2, metric_list, ["pre"], "post")
+    
+    # Part 2.1
+    clf = tree_grow(x_train, y_train, nmin = 15, minleaf = 5, nfeat = 41)
+    y_pred = tree_pred(x_test, clf)
+    print("Part 2.1")
+    data_analysis(y_test, y_pred)
+    
+    clf = tree_grow_b(x_train, y_train, nmin = 15, minleaf = 5, nfeat = 41, m= 100)
+    y_pred = tree_pred_b(x_test, clf)
+    print("Part 2.2")
+    data_analysis(y_test, y_pred)
+    
+    clf = tree_grow_b(x_train, y_train, nmin = 15, minleaf = 5, nfeat = 6, m= 100)
+    y_pred = tree_pred_b(x_test, clf)
+    print("Part 2.3")
+    data_analysis(y_test, y_pred)
 
-clf_2 = tree_grow_b(train_data_x,train_data_y,nmin = 15, minleaf = 5, nfeat = 41, m= 100)
-res_y_2 = tree_pred_b(test_data_x,clf_2)
-print("Part 2.2")
-data_analysis(test_data_y,res_y_2)
-
-clf_3 = tree_grow_b(train_data_x,train_data_y,nmin = 15, minleaf = 5, nfeat = 6, m= 100)
-res_y_3 = tree_pred_b(test_data_x,clf_3)
-print("Part 2.3")
-data_analysis(test_data_y,res_y_3)
+"""
+1. A short description of the data.
+2. A picture of the first two splits of the single tree (the split in the root
+node, and the split in its left or right child). Consider the classification
+rule that you get by assigning to the majority class in the three leaf nodes
+of this heavily simplified tree. Discuss whether this classification rule
+makes sense, given the meaning of the attributes. (Xinhao will do it)
+3. Confusion matrices and the requested quality measures for all three models
+(single tree, bagging, random forest).  (√)
+4. A discussion of whether the differences in accuracy (that is, the proportion
+of correct predictions) found on the test set are statistically significant.
+Find a statistical test that is suited for this purpose.
+"""
