@@ -51,11 +51,11 @@ class Node:
                 result = 0
             return("leaf node --> " + str(result))
         return("\n" + self.space + "Split feature name: " + columns_list[self.split[0]] + "; Split feature threshold " + str(self.split[1]) + "."
-                + "\n" + self.space + "Total number examples: " +
-                str(len(self.value))
-                + ". " + str(sum(self.label)) + " labels are one and " +
-                str(len(self.label) - sum(self.label)) + " labels are zero."
-                + "\n" + self.space + "Left: " + str(self.left) + "\n" + self.space + "Right: " + str(self.right))
+               + "\n" + self.space + "Total number examples: " +
+               str(len(self.value))
+               + ". " + str(sum(self.label)) + " labels are one and " +
+               str(len(self.label) - sum(self.label)) + " labels are zero."
+               + "\n" + self.space + "Left: " + str(self.left) + "\n" + self.space + "Right: " + str(self.right))
 
     def tree_update(self, split, left, right):
         """
@@ -113,7 +113,7 @@ class Node:
                 gini_small = (sum(self.label[index_small])/len(index_small)) * (
                     1-(sum(self.label[index_small])/len(index_small)))
                 reduction = (self.Gini_impurity() - (gini_big*(len(index_big) /
-                            len(self.label)) + gini_small*(len(index_small)/len(self.label))))
+                             len(self.label)) + gini_small*(len(index_small)/len(self.label))))
                 if reduction > reduction_temp and len(index_big) >= minleaf and len(index_small) >= minleaf:
                     i_temp = i
                     thre_temp = thre

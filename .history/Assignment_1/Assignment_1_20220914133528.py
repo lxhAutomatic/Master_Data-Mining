@@ -51,11 +51,11 @@ class Node:
                 result = 0
             return("leaf node --> " + str(result))
         return("\n" + self.space + "Split feature name: " + columns_list[self.split[0]] + "; Split feature threshold " + str(self.split[1]) + "."
-                + "\n" + self.space + "Total number examples: " +
-                str(len(self.value))
-                + ". " + str(sum(self.label)) + " labels are one and " +
-                str(len(self.label) - sum(self.label)) + " labels are zero."
-                + "\n" + self.space + "Left: " + str(self.left) + "\n" + self.space + "Right: " + str(self.right))
+               + "\n" + self.space + "Total number examples: " +
+               str(len(self.value))
+               + ". " + str(sum(self.label)) + " labels are one and " +
+               str(len(self.label) - sum(self.label)) + " labels are zero."
+               + "\n" + self.space + "Left: " + str(self.left) + "\n" + self.space + "Right: " + str(self.right))
 
     def tree_update(self, split, left, right):
         """

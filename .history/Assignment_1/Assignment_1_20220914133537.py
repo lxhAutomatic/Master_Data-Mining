@@ -54,8 +54,8 @@ class Node:
                 + "\n" + self.space + "Total number examples: " +
                 str(len(self.value))
                 + ". " + str(sum(self.label)) + " labels are one and " +
-                str(len(self.label) - sum(self.label)) + " labels are zero."
-                + "\n" + self.space + "Left: " + str(self.left) + "\n" + self.space + "Right: " + str(self.right))
+               str(len(self.label) - sum(self.label)) + " labels are zero."
+               + "\n" + self.space + "Left: " + str(self.left) + "\n" + self.space + "Right: " + str(self.right))
 
     def tree_update(self, split, left, right):
         """

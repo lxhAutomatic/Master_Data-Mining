@@ -16,13 +16,11 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, confu
 
 columns_list = ["pre"]
 
-
 class Node:
     """
     A class which represents each node in the decision tree.
     """
-
-    def __init__(self, value, label):
+    def __init__ (self, value, label):
         """
         A initialization function which initialize the entity.
 
@@ -37,11 +35,11 @@ class Node:
         self.value = value
         self.label = label
         self.space = ""
-
-    def __str__(self):
+        
+    def __str__ (self):
         """
         A function is used to print the tree by using words.
-
+        
         return None.
         """
         if self.split is None:
@@ -49,18 +47,16 @@ class Node:
                 result = 1
             else:
                 result = 0
-            return("leaf node --> " + str(result))
-        return("\n" + self.space + "Split feature name: " + columns_list[self.split[0]] + "; Split feature threshold " + str(self.split[1]) + "."
-                + "\n" + self.space + "Total number examples: " +
-                str(len(self.value))
-                + ". " + str(sum(self.label)) + " labels are one and " +
-                str(len(self.label) - sum(self.label)) + " labels are zero."
-                + "\n" + self.space + "Left: " + str(self.left) + "\n" + self.space + "Right: " + str(self.right))
-
-    def tree_update(self, split, left, right):
+            return( "leaf node --> " + str(result))
+        return( "\n" + self.space + "Split feature name: " + columns_list[self.split[0]] + "; Split feature threshold " + str(self.split[1]) + "."
+               + "\n" + self.space + "Total number examples: " + str(len(self.value))
+               + ". " + str(sum(self.label)) + " labels are one and " + str(len(self.label) - sum(self.label)) + " labels are zero."
+               + "\n" + self.space + "Left: " + str(self.left) + "\n" + self.space + "Right: " + str(self.right))
+        
+    def tree_update (self, split, left, right):
         """
         This function is used to update the split, left and right value for one entity
-
+        
         :param split: list. The first element in the list is the feature index which is used to split.
                             The second element in the list is the threshold value whcih is used to wplit.
         :param left: Node. Another node class which contains the content of the left node of the current node.
@@ -73,15 +69,14 @@ class Node:
         self.split = split
         self.left = left
         self.right = right
-
-    def Gini_impurity(self):
+        
+    def Gini_impurity (self):
         """
         This function is used to calculate the gini impurity
 
         return float. The result of gini impurity.
         """
         return (sum(self.label)/len(self.label)) * (1-(sum(self.label)/len(self.label)))
-
     def split_tree(self, minleaf, nfeat):
         """
         This function is used to split the tree based on the gini impurity
@@ -98,22 +93,16 @@ class Node:
         thre_temp = 0
         reduction_temp = 0
         flag = False
-        features_list = np.sort(np.random.choice(
-            np.arange(len(self.value[0])), size=nfeat, replace=False))
+        features_list = np.sort(np.random.choice(np.arange(len(self.value[0])), size=nfeat, replace=False))
         for i in features_list:
             features = np.sort(np.unique(self.value[:, i]))
             for j, feature in enumerate(features[: -1]):
                 thre = (features[j + 1] + feature)/2
-                index_big = np.arange(len(self.value[:, i]))[
-                    self.value[:, i] > thre]
-                index_small = np.arange(len(self.value[:, i]))[
-                    self.value[:, i] <= thre]
-                gini_big = (sum(self.label[index_big])/len(index_big)) * \
-                    (1-(sum(self.label[index_big])/len(index_big)))
-                gini_small = (sum(self.label[index_small])/len(index_small)) * (
-                    1-(sum(self.label[index_small])/len(index_small)))
-                reduction = (self.Gini_impurity() - (gini_big*(len(index_big) /
-                            len(self.label)) + gini_small*(len(index_small)/len(self.label))))
+                index_big = np.arange(len(self.value[:, i]))[self.value[:, i] > thre]
+                index_small = np.arange(len(self.value[:, i]))[self.value[:, i] <= thre]
+                gini_big = (sum(self.label[index_big])/len(index_big)) * (1-(sum(self.label[index_big])/len(index_big)))
+                gini_small = (sum(self.label[index_small])/len(index_small)) * (1-(sum(self.label[index_small])/len(index_small)))
+                reduction = (self.Gini_impurity() - (gini_big*(len(index_big)/len(self.label)) + gini_small*(len(index_small)/len(self.label))))
                 if reduction > reduction_temp and len(index_big) >= minleaf and len(index_small) >= minleaf:
                     i_temp = i
                     thre_temp = thre
@@ -121,30 +110,28 @@ class Node:
                     flag = True
         if flag == False:
             return None, None, None
-        index_big = np.arange(len(self.value[:,  i_temp]))[
-            self.value[:, i_temp] > thre_temp]
-        index_small = np.arange(len(self.value[:,  i_temp]))[
-            self.value[:, i_temp] <= thre_temp]
+        index_big = np.arange(len(self.value[:,  i_temp]))[self.value[:, i_temp] > thre_temp]
+        index_small = np.arange(len(self.value[:,  i_temp]))[self.value[:, i_temp] <= thre_temp]
         split = [i_temp, thre_temp]
         #print(columns_list[i_temp] + " > " + str(thre_temp))
         left = Node(self.value[index_big], self.label[index_big])
-        right = Node(self.value[index_small], self.label[index_small])
-
+        right = Node(self.value[index_small], self.label[index_small])  
+        
         return split, left, right
 
-
-def tree_grow(x, y, nmin=None, minleaf=None, nfeat=None):
+  
+def tree_grow (x, y, nmin = None, minleaf = None, nfeat = None):
     """
     This function is used to grow a classification tree.
-
-    :param x: numpy.ndarray. A data matrix (2-dimensional array) containing the attribute values.
-                    Each row of x contains the attribute values of one training example.
-    :param y: numpy.ndarray. The vector (1-dimensional array) of class labels.
-                    The class label is binary, with values coded as 0 and 1.
+    
+    :param x: numpy.ndarray. A data matrix (2-dimensional array) containing the attribute values. 
+                   Each row of x contains the attribute values of one training example.
+    :param y: numpy.ndarray. The vector (1-dimensional array) of class labels. 
+                   The class label is binary, with values coded as 0 and 1.
     :param nmin: int. If a node contains fewer cases than nmin, it becomes a leaf node.
     :param minleaf: int. The minimum number of observations required for a leaf node.
     :param nfeat: int. The number of features that should be considered for each split.
-
+        
     return root: Node. The constructed decision tree.
     """
     root = Node(x, y)
@@ -162,16 +149,15 @@ def tree_grow(x, y, nmin=None, minleaf=None, nfeat=None):
                 nodes.append(left)
                 nodes.append(right)
         #temp += 1
-        # if temp == 2:
+        #if temp == 2:
         #    print(root)
-    return root
+    return root    
 
-
-def tree_pred(x, tr):
+def tree_pred (x, tr):
     """
     This function is used to predicted class labels for the cases in x.
 
-    :param x: numpy.ndarray. A data matrix (2-dimensional array) containing the attribute values of the cases
+    :param x: numpy.ndarray. A data matrix (2-dimensional array) containing the attribute values of the cases 
                     for which predictions are required,
     :param tr: Node. A tree object created with the function tree_grow.
 
@@ -192,20 +178,19 @@ def tree_pred(x, tr):
         y.append(label)
     return y
 
-
-def tree_grow_b(x, y, nmin=None, minleaf=None, nfeat=None, m=None):
+def tree_grow_b (x, y, nmin = None, minleaf = None, nfeat = None, m = None):
     """
     This function is used to grow a list of m classification tree.
-
-    :param x: numpy.ndarray. A data matrix (2-dimensional array) containing the attribute values.
-                    Each row of x contains the attribute values of one training example.
-    :param y: numpy.ndarray. The vector (1-dimensional array) of class labels.
-                    The class label is binary, with values coded as 0 and 1.
+    
+    :param x: numpy.ndarray. A data matrix (2-dimensional array) containing the attribute values. 
+                   Each row of x contains the attribute values of one training example.
+    :param y: numpy.ndarray. The vector (1-dimensional array) of class labels. 
+                   The class label is binary, with values coded as 0 and 1.
     :param nmin: int. If a node contains fewer cases than nmin, it becomes a leaf node.
     :param minleaf: int. The minimum number of observations required for a leaf node.
     :param nfeat: int. The number of features that should be considered for each split.
     :param m: int. The number of bootstrap samples to be drawn.
-
+        
     return tree_list: list. A list of m constructed decision tree.
     """
     tree_list = []
@@ -214,12 +199,11 @@ def tree_grow_b(x, y, nmin=None, minleaf=None, nfeat=None, m=None):
         tree_list.append(tree_grow(x[index], y[index], nmin, minleaf, nfeat))
     return tree_list
 
-
-def tree_pred_b(x, trs):
+def tree_pred_b (x, trs):
     """
     This function is used to predicted class labels for the cases in x with a list of m constructed decision tree.
 
-    :param x: numpy.ndarray. A data matrix (2-dimensional array) containing the attribute values of the cases
+    :param x: numpy.ndarray. A data matrix (2-dimensional array) containing the attribute values of the cases 
                     for which predictions are required,
     :param trs: list. A list of m constructed decision tree.
 
@@ -243,24 +227,22 @@ def tree_pred_b(x, trs):
         ys.append(max(set(y), key=y.count))
     return ys
 
-
 def data_analysis(actual, predict):
     """
     This function is used to compute and print the accuracy, precision and recall of the result.
-
+    
     :param actual: numpy.ndarray. The acutual labels of the test set.
     :param predict: numpy.ndarray. The predicted labels of the test set.
     """
-    acc = accuracy_score(actual, predict)  # Calculate the accuracy score.
+    acc = accuracy_score(actual, predict) # Calculate the accuracy score.
     print("Accuracy:", acc)
-    p = precision_score(actual, predict)  # Calculate the precision score.
+    p = precision_score(actual, predict) # Calculate the precision score.
     print("Precision:", p)
-    r = recall_score(actual, predict)  # Calculate the recall score.
+    r = recall_score(actual, predict) # Calculate the recall score.
     print("Recall:", r)
-    cm = confusion_matrix(actual, predict)  # Calculate the confusion matrix.
+    cm = confusion_matrix(actual, predict) # Calculate the confusion matrix.
     print("Confusion Matrix:")
     print(cm)
-
 
 def data_preparation(path_1, path_2, metric_list, columns_name):
     """
@@ -276,24 +258,24 @@ def data_preparation(path_1, path_2, metric_list, columns_name):
     return test_data_x: numpy.ndarray. Numpy matrix for the feature value in the test data.
     return test_data_y: numpy.ndarray. Numpy matrix for the label value in the test data.
     """
-    # read data from the  csv file
+    #read data from the  csv file
     train_data = pd.read_csv(path_1, sep=";")
-    test_data = pd.read_csv(path_2, sep=";")
+    test_data = pd.read_csv(path_2,sep=";")
     global columns_list
-    # get pre-release bugs and
+    # get pre-release bugs and 
     # FOUT MLOC NBD PAR VG NOF NOM NSF NSM ACD NOI NOT TLOC(*3) + NOCU (*1) + pre-release bugs = 41 predictor variables
     for j in metric_list:
-        for i in train_data.columns:
-            if j in i:
-                columns_list.append(i)
-
+      for i in train_data.columns:
+        if j in i:
+          columns_list.append(i)
+    
     train_data_x = train_data[columns_list]
     train_data.loc[train_data[columns_name] > 0, columns_name] = 1
     train_data_y = train_data[columns_name]
     # change DataFrame into np.array
     train_data_x = np.array(train_data_x)
     train_data_y = np.array(train_data_y)
-
+    
     test_data_x = test_data[columns_list]
     test_data.loc[test_data[columns_name] > 0, columns_name] = 1
     test_data_y = test_data[columns_name]
@@ -304,20 +286,16 @@ def data_preparation(path_1, path_2, metric_list, columns_name):
 
 
 if __name__ == '__main__':
-    path_1 = pathlib.Path(
-        r"Assignment_1\Data\eclipse-metrics-packages-2.0.csv")
-    path_2 = pathlib.Path(
-        r"Assignment_1\Data\eclipse-metrics-packages-3.0.csv")
-    metric_list = ["FOUT", "MLOC", "NBD", "PAR", "VG", "NOF",
-                    "NOM", "NSF", "NSM", "ACD", "NOI", "NOT", "TLOC", "NOCU"]
-
-    x_train, y_train, x_test, y_test = data_preparation(
-        path_1, path_2, metric_list, "post")
-
+    path_1 = pathlib.Path(r"Assignment_1\Data\eclipse-metrics-packages-2.0.csv")
+    path_2 = pathlib.Path(r"Assignment_1\Data\eclipse-metrics-packages-3.0.csv")
+    metric_list = ["FOUT", "MLOC", "NBD", "PAR", "VG", "NOF", "NOM", "NSF", "NSM", "ACD", "NOI", "NOT", "TLOC", "NOCU"]
+    
+    x_train, y_train, x_test, y_test = data_preparation(path_1, path_2, metric_list, "post")
+    
     # Part 2.1
-    clf = tree_grow(x_train, y_train, nmin=15, minleaf=5, nfeat=41)
+    clf = tree_grow(x_train, y_train, nmin = 15, minleaf = 5, nfeat = 41)
     y_pred = tree_pred(x_test, clf)
-    # print(clf)
+    #print(clf)
     print("Part 2.1")
     data_analysis(y_test, y_pred)
     """
@@ -325,7 +303,7 @@ if __name__ == '__main__':
     y_pred = tree_pred_b(x_test, clf)
     print("Part 2.2")
     data_analysis(y_test, y_pred)
-
+    
     clf = tree_grow_b(x_train, y_train, nmin = 15, minleaf = 5, nfeat = 6, m= 100)
     y_pred = tree_pred_b(x_test, clf)
     print("Part 2.3")
