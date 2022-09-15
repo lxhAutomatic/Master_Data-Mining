@@ -4,7 +4,7 @@ Created on Fri Sep  9 16:20:34 2022
 
 @author: Name 1, Xinhao Lan, Yanming Li.
 """
-# Name 1 (Student number 1)
+# Tingting Zhang (7278888)
 # Xinhao Lan (1082620)
 # Yanming Li (2033070)
 
