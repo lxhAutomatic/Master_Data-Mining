@@ -269,7 +269,7 @@ def data_preparation(path_1, path_2, metric_list, columns_name):
     :param path_1: str. Path for the eclipse data 2.0.
     :param path_2: str. Path for the eclipse data 3.0.
     :param metric_list: list. List contains the column index for the feature.
-    :param columns_name: str. This parameter is used to get if there are any post-release bugs that have been reported.
+    :param columns_name: str. This parameter is used to judge if there are any post-release bugs that have been reported.
 
     return train_data_x: numpy.ndarray. Numpy matrix for the feature value in the training data.
     return train_data_y: numpy.ndarray. Numpy matrix for the label value in the training data.
