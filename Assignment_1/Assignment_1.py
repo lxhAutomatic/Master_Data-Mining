@@ -257,6 +257,8 @@ def data_analysis(actual, predict):
     cm = confusion_matrix(actual, predict)  # Calculate the confusion matrix.
     print("Confusion Matrix:")
     print(cm)
+    tn, fp, fn, tp = confusion_matrix(actual, predict).ravel()
+    print("tp:",tp,"tn:",tn,"fp:",fp,"fn:",fn)
 
 
 def data_preparation(path_1, path_2, metric_list, columns_name):
