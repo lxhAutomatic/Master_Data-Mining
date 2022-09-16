@@ -14,7 +14,7 @@ import pandas as pd
 import pathlib
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 
-columns_list = ["pre"]
+columns_list = ["pre"] # colunmns_list is used to store the columns' name in the .csv data file.
 
 
 class Node:
@@ -36,11 +36,11 @@ class Node:
         self.right = None
         self.value = value
         self.label = label
-        self.space = ""
+        self.space = ""   # self.space is used to facilitate printing the tree
 
     def __str__(self):
         """
-        A function is used to print the tree by using words.
+        A function is used to print the structure of the tree through text.
 
         return None.
         """
@@ -59,7 +59,7 @@ class Node:
 
     def tree_update(self, split, left, right):
         """
-        This function is used to update the split, left and right value for one entity
+        This function is used to update the split, left ,and right value for an entity
 
         :param split: list. The first element in the list is the feature index which is used to split.
                             The second element in the list is the threshold value whcih is used to wplit.
@@ -68,6 +68,8 @@ class Node:
 
         return None.
         """
+
+        # Represent child nodes at different levels
         left.space = self.space + "\t"
         right.space = self.space + "\t"
         self.split = split
@@ -126,7 +128,6 @@ class Node:
         index_small = np.arange(len(self.value[:,  i_temp]))[
             self.value[:, i_temp] <= thre_temp]
         split = [i_temp, thre_temp]
-        #print(columns_list[i_temp] + " > " + str(thre_temp))
         left = Node(self.value[index_big], self.label[index_big])
         right = Node(self.value[index_small], self.label[index_small])
 
@@ -148,7 +149,6 @@ def tree_grow(x, y, nmin=None, minleaf=None, nfeat=None):
     return root: Node. The constructed decision tree.
     """
     root = Node(x, y)
-    #temp = 0
     if len(y) < nmin:
         return root
     nodes = list()
@@ -161,9 +161,6 @@ def tree_grow(x, y, nmin=None, minleaf=None, nfeat=None):
                 node.tree_update(split, left, right)
                 nodes.append(left)
                 nodes.append(right)
-        #temp += 1
-        # if temp == 2:
-        #    print(root)
     return root
 
 
@@ -314,10 +311,9 @@ if __name__ == '__main__':
     x_train, y_train, x_test, y_test = data_preparation(
         path_1, path_2, metric_list, "post")
 
-    # Part 2.1
     clf = tree_grow(x_train, y_train, nmin=15, minleaf=5, nfeat=41)
     y_pred = tree_pred(x_test, clf)
-    # print(clf)
+    print(clf)
     print("Single Tree")
     data_analysis(y_test, y_pred)
 
