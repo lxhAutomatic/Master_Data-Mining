@@ -31,12 +31,12 @@ class Node:
 
         return None.
         """
-        self.split = None
-        self.left = None
-        self.right = None
-        self.value = value
-        self.label = label
-        self.space = ""
+        self.split = None # a list contains two elements, the first is the feature name to split and the second is the thershold value. 
+        self.left = None # a new node class which contains information of the left node.
+        self.right = None # a new node class which contains inforamtion of the right node.
+        self.value = value # saved feature value.
+        self.label = label # saved label value.
+        self.space = "" # this is used to better print the tree.
 
     def __str__(self):
         """
@@ -44,12 +44,13 @@ class Node:
 
         return None.
         """
-        if self.split is None:
+        if self.split is None: # if this is a leaf node
             if sum(self.label) > (len(self.label) - sum(self.label)):
                 result = 1
             else:
                 result = 0
             return("leaf node --> " + str(result))
+        # if this is not a leaf node, print the feature name, threshold, labels distribution.
         return("\n" + self.space + "Split feature name: " + columns_list[self.split[0]] + "; Split feature threshold " + str(self.split[1]) + "."
                 + "\n" + self.space + "Total number examples: " +
                 str(len(self.value))
@@ -68,11 +69,11 @@ class Node:
 
         return None.
         """
-        left.space = self.space + "\t"
-        right.space = self.space + "\t"
-        self.split = split
-        self.left = left
-        self.right = right
+        left.space = self.space + "\t" # uodate the space before the left node.
+        right.space = self.space + "\t" # update the space before the right node.
+        self.split = split # update the split list.
+        self.left = left # update the information of the left node.
+        self.right = right # update the information of the right node.
 
     def Gini_impurity(self):
         """
@@ -80,7 +81,7 @@ class Node:
 
         return float. The result of gini impurity.
         """
-        return (sum(self.label)/len(self.label)) * (1-(sum(self.label)/len(self.label)))
+        return (sum(self.label)/len(self.label)) * (1-(sum(self.label)/len(self.label))) # compute the gini impurity.
 
     def split_tree(self, minleaf, nfeat):
         """
@@ -97,23 +98,30 @@ class Node:
         i_temp = 0
         thre_temp = 0
         reduction_temp = 0
+        # used to judge return none or not 
         flag = False
-        features_list = np.sort(np.random.choice(
-            np.arange(len(self.value[0])), size=nfeat, replace=False))
+        # select random feature set
+        features_list = np.sort(np.random.choice(np.arange(len(self.value[0])), size=nfeat, replace=False))
+        # loop the whole feature list
         for i in features_list:
             features = np.sort(np.unique(self.value[:, i]))
+            # loop the feature to find the best split
             for j, feature in enumerate(features[: -1]):
+                #calculate the threshold value
                 thre = (features[j + 1] + feature)/2
+                # find the index for the example which is bigger or smaller than the threshold
                 index_big = np.arange(len(self.value[:, i]))[
                     self.value[:, i] > thre]
                 index_small = np.arange(len(self.value[:, i]))[
                     self.value[:, i] <= thre]
+                # caluculate the gini index
                 gini_big = (sum(self.label[index_big])/len(index_big)) * \
                     (1-(sum(self.label[index_big])/len(index_big)))
                 gini_small = (sum(self.label[index_small])/len(index_small)) * (
                     1-(sum(self.label[index_small])/len(index_small)))
                 reduction = (self.Gini_impurity() - (gini_big*(len(index_big) /
                             len(self.label)) + gini_small*(len(index_small)/len(self.label))))
+                # update the index, threshold and reduction, change the flag
                 if reduction > reduction_temp and len(index_big) >= minleaf and len(index_small) >= minleaf:
                     i_temp = i
                     thre_temp = thre
@@ -126,7 +134,6 @@ class Node:
         index_small = np.arange(len(self.value[:,  i_temp]))[
             self.value[:, i_temp] <= thre_temp]
         split = [i_temp, thre_temp]
-        #print(columns_list[i_temp] + " > " + str(thre_temp))
         left = Node(self.value[index_big], self.label[index_big])
         right = Node(self.value[index_small], self.label[index_small])
 
@@ -147,23 +154,24 @@ def tree_grow(x, y, nmin=None, minleaf=None, nfeat=None):
 
     return root: Node. The constructed decision tree.
     """
+    # initalize the root node 
     root = Node(x, y)
-    #temp = 0
+    # Judge the requiremrent of nmin parameter
     if len(y) < nmin:
         return root
     nodes = list()
     nodes.append(root)
+    # loop until the node is empty
     while nodes:
-        node = nodes.pop()
+        node = nodes.pop() # pop the current node
         if node.Gini_impurity() > 0 and len(node.label) >= nmin:
+            #grow the tree when one split is done
             split, left, right = node.split_tree(minleaf, nfeat)
             if left != None:
+            # update and append the node if the left node is not a leaf node 
                 node.tree_update(split, left, right)
                 nodes.append(left)
                 nodes.append(right)
-        #temp += 1
-        # if temp == 2:
-        #    print(root)
     return root
 
 
@@ -180,11 +188,15 @@ def tree_pred(x, tr):
     y = []
     for i in x:
         tr_temp = tr
+        # continue while the left node is not a null
         while tr_temp.left:
+            # value is bigger than the threshold value
             if i[tr_temp.split[0]] > tr_temp.split[1]:
                 tr_temp = tr_temp.left
+            # value is smaller than the threshold value
             else:
                 tr_temp = tr_temp.right
+        # calculate the majority label of the trees
         if sum(tr_temp.label) > (len(tr_temp.label) - sum(tr_temp.label)):
             label = 1
         else:
@@ -210,7 +222,9 @@ def tree_grow_b(x, y, nmin=None, minleaf=None, nfeat=None, m=None):
     """
     tree_list = []
     for i in range(m):
+        # bootstrap
         index = np.random.choice(range(len(y)), size=len(y))
+        # grow the tree and add it into the list
         tree_list.append(tree_grow(x[index], y[index], nmin, minleaf, nfeat))
     return tree_list
 
@@ -227,7 +241,9 @@ def tree_pred_b(x, trs):
     """
     ys = []
     for i in x:
+        # for the y, it is almost the same as the code in tree_pred
         y = []
+        # loop in the tree list
         for tree in trs:
             tr_temp = tree
             while tr_temp.left:
@@ -305,9 +321,9 @@ def data_preparation(path_1, path_2, metric_list, columns_name):
 
 if __name__ == '__main__':
     path_1 = pathlib.Path(
-        r"Assignment_1\Data\eclipse-metrics-packages-2.0.csv")
+        r"Data\eclipse-metrics-packages-2.0.csv")
     path_2 = pathlib.Path(
-        r"Assignment_1\Data\eclipse-metrics-packages-3.0.csv")
+        r"Data\eclipse-metrics-packages-3.0.csv")
     metric_list = ["FOUT", "MLOC", "NBD", "PAR", "VG", "NOF",
                     "NOM", "NSF", "NSM", "ACD", "NOI", "NOT", "TLOC", "NOCU"]
 
@@ -317,7 +333,7 @@ if __name__ == '__main__':
     # Part 2.1
     clf = tree_grow(x_train, y_train, nmin=15, minleaf=5, nfeat=41)
     y_pred = tree_pred(x_test, clf)
-    # print(clf)
+    print(clf)
     print("Single Tree")
     data_analysis(y_test, y_pred)
 
