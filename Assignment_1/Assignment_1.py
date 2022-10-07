@@ -155,7 +155,7 @@ def tree_grow(x, y, nmin=None, minleaf=None, nfeat=None):
 
     return root: Node. The constructed decision tree.
     """
-    # initalize the root node 
+    # initalize the root node
     root = Node(x, y)
     # Judge the requiremrent of nmin parameter
     if len(y) < nmin:
@@ -169,7 +169,7 @@ def tree_grow(x, y, nmin=None, minleaf=None, nfeat=None):
             #grow the tree when one split is done
             split, left, right = node.split_tree(minleaf, nfeat)
             if left != None:
-            # update and append the node if the left node is not a leaf node 
+            # update and append the node if the left node is not a leaf node
                 node.tree_update(split, left, right)
                 nodes.append(left)
                 nodes.append(right)
@@ -263,7 +263,7 @@ def tree_pred_b(x, trs):
 
 def data_analysis(actual, predict):
     """
-    This function is used to compute and print the accuracy, precision and recall of the result. 
+    This function is used to compute and print the accuracy, precision and recall of the result.
     Also compute chi-squared and p-value to test if the result are statistically significant.
 
     :param actual: numpy.ndarray. The acutual labels of the test set.
@@ -277,14 +277,13 @@ def data_analysis(actual, predict):
     print("Recall:", r)
     cm = confusion_matrix(actual, predict)  # Calculate the confusion matrix.
     print("Confusion Matrix:")
-    print(cm)
     # cm_new is for rearranging confusion matrix to compute chi-squared and p-value
     cm_new = np.zeros((2,2),int)
     cm_new[0,0] = cm[1,1]
     cm_new[0,1] = cm[0,0]
     cm_new[1,0] = cm[0,1]
     cm_new[1,1] = cm[1,0]
-    cm_new = np.array(cm_new)
+    print(cm_new)
     chi2, p = mcnemar(ary=cm_new, corrected=True)
     print('chi-squared:', chi2)
     print('p-value:', p)
