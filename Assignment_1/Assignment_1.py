@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import pathlib
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
+from mlxtend.evaluate import mcnemar
 
 columns_list = ["pre"]
 
@@ -276,6 +277,16 @@ def data_analysis(actual, predict):
     cm = confusion_matrix(actual, predict)  # Calculate the confusion matrix.
     print("Confusion Matrix:")
     print(cm)
+    # cm_new is for rearranging confusion matrix to compute chi-squared and p-value
+    cm_new = np.zeros((2,2),int)
+    cm_new[0,0] = cm[1,1]
+    cm_new[0,1] = cm[0,0]
+    cm_new[1,0] = cm[0,1]
+    cm_new[1,1] = cm[1,0]
+    cm_new = np.array(cm_new)
+    chi2, p = mcnemar(ary=cm_new, corrected=True)
+    print('chi-squared:', chi2)
+    print('p-value:', p)
 
 
 def data_preparation(path_1, path_2, metric_list, columns_name):
@@ -321,9 +332,9 @@ def data_preparation(path_1, path_2, metric_list, columns_name):
 
 if __name__ == '__main__':
     path_1 = pathlib.Path(
-        r"Data\eclipse-metrics-packages-2.0.csv")
+        r"Assignment_1\Data\eclipse-metrics-packages-2.0.csv")
     path_2 = pathlib.Path(
-        r"Data\eclipse-metrics-packages-3.0.csv")
+        r"Assignment_1\Data\eclipse-metrics-packages-3.0.csv")
     metric_list = ["FOUT", "MLOC", "NBD", "PAR", "VG", "NOF",
                     "NOM", "NSF", "NSM", "ACD", "NOI", "NOT", "TLOC", "NOCU"]
 
