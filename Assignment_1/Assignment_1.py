@@ -263,7 +263,8 @@ def tree_pred_b(x, trs):
 
 def data_analysis(actual, predict):
     """
-    This function is used to compute and print the accuracy, precision and recall of the result.
+    This function is used to compute and print the accuracy, precision and recall of the result. 
+    Also compute chi-squared and p-value to test if the result are statistically significant.
 
     :param actual: numpy.ndarray. The acutual labels of the test set.
     :param predict: numpy.ndarray. The predicted labels of the test set.
