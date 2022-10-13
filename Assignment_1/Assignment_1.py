@@ -100,7 +100,7 @@ class Node:
         i_temp = 0
         thre_temp = 0
         reduction_temp = 0
-        # used to judge return none or not 
+        # used to judge return none or not
         flag = False
         # select random feature set
         features_list = np.sort(np.random.choice(np.arange(len(self.value[0])), size=nfeat, replace=False))
@@ -156,7 +156,7 @@ def tree_grow(x, y, nmin=None, minleaf=None, nfeat=None):
 
     return root: Node. The constructed decision tree.
     """
-    # initalize the root node 
+    # initalize the root node
     root = Node(x, y)
     # Judge the requiremrent of nmin parameter
     if len(y) < nmin:
@@ -170,7 +170,7 @@ def tree_grow(x, y, nmin=None, minleaf=None, nfeat=None):
             #grow the tree when one split is done
             split, left, right = node.split_tree(minleaf, nfeat)
             if left != None:
-            # update and append the node if the left node is not a leaf node 
+            # update and append the node if the left node is not a leaf node
                 node.tree_update(split, left, right)
                 nodes.append(left)
                 nodes.append(right)
@@ -329,12 +329,18 @@ def data_preparation(path_1, path_2, metric_list, columns_name):
 
 
 if __name__ == '__main__':
+# Relative paths may be different in different environments
     path_1 = pathlib.Path(
-        # r"Data\eclipse-metrics-packages-2.0.csv")
-        r"Assignment_1\Data\eclipse-metrics-packages-2.0.csv")
+        r"Data\eclipse-metrics-packages-2.0.csv")
+    if ~path_1.is_file():
+        path_1 = pathlib.Path(
+            r"Assignment_1\Data\eclipse-metrics-packages-2.0.csv")
     path_2 = pathlib.Path(
-        # r"Data\eclipse-metrics-packages-3.0.csv")
-        r"Assignment_1\Data\eclipse-metrics-packages-3.0.csv")
+        r"Data\eclipse-metrics-packages-3.0.csv")
+    if ~path_2.is_file():
+        path_2 = pathlib.Path(
+            r"Assignment_1\Data\eclipse-metrics-packages-3.0.csv")
+
     metric_list = ["FOUT", "MLOC", "NBD", "PAR", "VG", "NOF",
                     "NOM", "NSF", "NSM", "ACD", "NOI", "NOT", "TLOC", "NOCU"]
 
