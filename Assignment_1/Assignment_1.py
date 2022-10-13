@@ -14,6 +14,7 @@ import pandas as pd
 import pathlib
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 from mlxtend.evaluate import mcnemar, mcnemar_table
+from scipy.stats import chisquare
 
 columns_list = ["pre"]
 
@@ -277,6 +278,13 @@ def data_analysis(actual, predict):
     cm = confusion_matrix(actual, predict)  # Calculate the confusion matrix.
     print("Confusion Matrix:")
     print(cm)
+    actual_true = sum(actual)
+    actual_false = len(actual)-actual_true
+    predict_true = sum(predict)
+    predict_false = len(predict) - predict_true
+    chisq, pvalue = chisquare([predict_true,predict_false],[actual_true,actual_false])
+    print("chisquare:",chisq)
+    print("p-value:",pvalue)
 
 
 def data_preparation(path_1, path_2, metric_list, columns_name):
@@ -322,9 +330,11 @@ def data_preparation(path_1, path_2, metric_list, columns_name):
 
 if __name__ == '__main__':
     path_1 = pathlib.Path(
-        r"Data\eclipse-metrics-packages-2.0.csv")
+        # r"Data\eclipse-metrics-packages-2.0.csv")
+        r"Assignment_1\Data\eclipse-metrics-packages-2.0.csv")
     path_2 = pathlib.Path(
-        r"Data\eclipse-metrics-packages-3.0.csv")
+        # r"Data\eclipse-metrics-packages-3.0.csv")
+        r"Assignment_1\Data\eclipse-metrics-packages-3.0.csv")
     metric_list = ["FOUT", "MLOC", "NBD", "PAR", "VG", "NOF",
                     "NOM", "NSF", "NSM", "ACD", "NOI", "NOT", "TLOC", "NOCU"]
 
@@ -332,7 +342,7 @@ if __name__ == '__main__':
         path_1, path_2, metric_list, "post")
 
     # Part 2.1
-    # Data prediction and analysis for the single tree 
+    # Data prediction and analysis for the single tree
     clf = tree_grow(x_train, y_train, nmin=15, minleaf=5, nfeat=41)
     y_pred_1 = np.array(tree_pred(x_test, clf))
     print(clf)
@@ -351,19 +361,22 @@ if __name__ == '__main__':
     # Significant test for single tree and bagging
     tb_1 = mcnemar_table(y_test, y_pred_1, y_pred_2)
     chi, p = mcnemar(tb_1)
+    print("Significant test for single tree and bagging:")
     print('chi-squared:', chi)
     print('p-value:', p)
     # Significant test for bagging and random forest
     tb_2 = mcnemar_table(y_test, y_pred_2, y_pred_3)
     chi, p = mcnemar(tb_2)
+    print("Significant test for bagging and random forest:")
     print('chi-squared:', chi)
     print('p-value:', p)
     # Significant test for single tree and random forest
     tb_3 = mcnemar_table(y_test, y_pred_3, y_pred_1)
     chi, p = mcnemar(tb_3)
+    print("Significant test for single tree and random forest:")
     print('chi-squared:', chi)
     print('p-value:', p)
-    
+
 
 """
 1. A short description of the data.
