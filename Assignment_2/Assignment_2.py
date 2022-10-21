@@ -10,11 +10,19 @@ import os
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
-from skelarn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 def read_data(path):
+    """
+    DESCRIPTION of the function
+
+    :param path : TYPE. DESCRIPTION.
+
+    return df : TYPE. DESCRIPTION.
+
+    """
     df = pd.DataFrame(columns = ['text', 'fold', 'label'])
     counter = 0
     for root, dirs, files in os.walk(path):
@@ -27,15 +35,19 @@ def read_data(path):
             counter = counter + 1
     return df
 
-path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
-df = read_data(path)
-print(df)
+
 
 # TODO use the algorithm to get the feature from those texts
 
 def MNB():
-
+    # TODO fine-tune tehe hyper-parameter 'The number of those features'
+    # TODO Implement the function for the Multinomial Naive Bayes.
+    # TODO Test the different score with the default parameter and best parameter.
+    
 def RLR():
+    # TODO fine-tune the hyper-parameter λ (or C = 1/λ).
+    # TODO Implement the function for the regularized logistic regression.
+    # TODO Test the different score with the default parameter and best parameter.
     
 def CT(x, y):
     # calculate the alpha
@@ -80,9 +92,13 @@ def CT(x, y):
 def RF(x, y, best_features, bigram = False):
     x_train = list(itertools.chain.from_iterable(x[:4]))
     y_train = list(itertools.chain.from_iterable(y[:4]))
+    
     # TODO select features with the use of bigram.
     
     
+path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
+df = read_data(path)
+print(df)
     
     
     
