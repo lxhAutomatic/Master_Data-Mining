@@ -261,32 +261,6 @@ def tree_pred_b(x, trs):
         ys.append(max(set(y), key=y.count))
     return ys
 
-
-def data_analysis(actual, predict):
-    """
-    This function is used to compute and print the accuracy, precision and recall of the result.
-
-    :param actual: numpy.ndarray. The acutual labels of the test set.
-    :param predict: numpy.ndarray. The predicted labels of the test set.
-    """
-    acc = accuracy_score(actual, predict)  # Calculate the accuracy score.
-    print("Accuracy:", acc)
-    p = precision_score(actual, predict)  # Calculate the precision score.
-    print("Precision:", p)
-    r = recall_score(actual, predict)  # Calculate the recall score.
-    print("Recall:", r)
-    cm = confusion_matrix(actual, predict)  # Calculate the confusion matrix.
-    print("Confusion Matrix:")
-    print(cm)
-    actual_true = sum(actual)
-    actual_false = len(actual)-actual_true
-    predict_true = sum(predict)
-    predict_false = len(predict) - predict_true
-    chisq, pvalue = chisquare([predict_true,predict_false],[actual_true,actual_false])
-    print("chisquare:",chisq)
-    print("p-value:",pvalue)
-
-
 def data_preparation(path_1, path_2, metric_list, columns_name):
     """
     This function is used to prepare the data and do the selection on the data.
@@ -352,48 +326,9 @@ if __name__ == '__main__':
     clf = tree_grow(x_train, y_train, nmin=15, minleaf=5, nfeat=41)
     y_pred_1 = np.array(tree_pred(x_test, clf))
     print(clf)
-    print("Single Tree")
-    data_analysis(y_test, y_pred_1)
     # Data prediction and analysis for the Bagging
     clf = tree_grow_b(x_train, y_train, nmin = 15, minleaf = 5, nfeat = 41, m= 100)
     y_pred_2 = np.array(tree_pred_b(x_test, clf))
-    print("Bagging")
-    data_analysis(y_test, y_pred_2)
     # Data prediction and analysis for the Random Forest
     clf = tree_grow_b(x_train, y_train, nmin = 15, minleaf = 5, nfeat = 6, m= 100)
     y_pred_3 = np.array(tree_pred_b(x_test, clf))
-    print("Random forest")
-    data_analysis(y_test, y_pred_3)
-    # Significant test for single tree and bagging
-    tb_1 = mcnemar_table(y_test, y_pred_1, y_pred_2)
-    chi, p = mcnemar(tb_1)
-    print("Significant test for single tree and bagging:")
-    print('chi-squared:', chi)
-    print('p-value:', p)
-    # Significant test for bagging and random forest
-    tb_2 = mcnemar_table(y_test, y_pred_2, y_pred_3)
-    chi, p = mcnemar(tb_2)
-    print("Significant test for bagging and random forest:")
-    print('chi-squared:', chi)
-    print('p-value:', p)
-    # Significant test for single tree and random forest
-    tb_3 = mcnemar_table(y_test, y_pred_3, y_pred_1)
-    chi, p = mcnemar(tb_3)
-    print("Significant test for single tree and random forest:")
-    print('chi-squared:', chi)
-    print('p-value:', p)
-
-
-"""
-1. A short description of the data.
-2. A picture of the first two splits of the single tree (the split in the root
-node, and the split in its left or right child). Consider the classification
-rule that you get by assigning to the majority class in the three leaf nodes
-of this heavily simplified tree. Discuss whether this classification rule
-makes sense, given the meaning of the attributes. (√)
-3. Confusion matrices and the requested quality measures for all three models
-(single tree, bagging, random forest).  (√)
-4. A discussion of whether the differences in accuracy (that is, the proportion
-of correct predictions) found on the test set are statistically significant.
-Find a statistical test that is suited for this purpose.
-"""
