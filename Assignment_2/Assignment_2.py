@@ -128,8 +128,6 @@ def CT(x_train, y_train, x_test, y_test):
     print()
     # calculate the alpha
     clf = DecisionTreeClassifier()
-    # x_train = list(itertools.chain.from_iterable(x[:4]))
-    # y_train = list(itertools.chain.from_iterable(y[:4]))
     alphas = clf.cost_complexity_pruning_path(x_train, y_train)["ccp_alphas"]
     betas = list()
     for i, a in enumerate(alphas[:-1]):
@@ -147,10 +145,6 @@ def CT(x_train, y_train, x_test, y_test):
 
     # with default alpha 0.0
     clf = DecisionTreeClassifier()
-    # x_train = list(itertools.chain.from_iterable(x[:4]))
-    # y_train = list(itertools.chain.from_iterable(y[:4]))
-    # x_test = x[4]
-    # y_test = y[4]
     clf = clf.fit(x_train, y_train)
     y_test_pre = clf.predict(x_test)
     print('With default ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
