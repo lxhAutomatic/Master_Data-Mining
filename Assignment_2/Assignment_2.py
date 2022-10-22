@@ -169,14 +169,8 @@ def CT(x_train, y_train, x_test, y_test):
     print()
 
 
-def RF(x, y, best_features, bigram=False):
-    x_train = list(itertools.chain.from_iterable(x[:4]))
-    y_train = list(itertools.chain.from_iterable(y[:4]))
-
-    # TODO select features with the use of bigram.
-
+def RF(x_train, y_train, x_test, y_test, best_features):
     features_range = [best_features-2, best_features, best_features+2]
-# features_range = [20, 40, 50, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 80, 100, 120]
     # 'n_estimators': [1000] fixed
     parameters = {'max_features': features_range}
     optimized_forest = RandomForestClassifier(n_estimators=1000)
@@ -191,8 +185,6 @@ def RF(x, y, best_features, bigram=False):
             "mean_test_score"][i], "\tstd_accuracy =", clf_test.cv_results_["std_test_score"][i])
     clf = RandomForestClassifier(
         n_estimators=1000, max_features=best_max_features)
-    x_test = x[4]
-    y_test = y[4]
     clf = clf.fit(x_train, y_train)
     y_test_pre = clf.predict(x_test)
     y_train_pre = clf.predict(x_train)
