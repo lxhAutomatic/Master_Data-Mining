@@ -4,6 +4,8 @@ Created on Sun Oct  9 16:16:40 2022
 
 @author: Xinhao Lan
 """
+from audioop import avg
+from matplotlib.pyplot import text
 import pandas as pd
 import numpy as np
 import os
@@ -14,6 +16,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import GridSearchCV
 
@@ -23,8 +28,8 @@ def read_data(path):
 
     :param path : TYPE. DESCRIPTION.
 
-    return df : TYPE. DESCRIPTION.
-
+    return df_train : TYPE. DESCRIPTION.
+    return df_test : TYPE. DESCRIPTION.
     """
     df = pd.DataFrame(columns = ['text', 'fold', 'label'])
     counter = 0
@@ -36,9 +41,50 @@ def read_data(path):
             else:
                 df.loc[counter] = [f.read(), root[-1], 1]
             counter = counter + 1
-    return df
 
+    df_train = df.loc[df['fold'] != '5']
+    df_train = df_train.reset_index(drop=True)
+    df_test = df.loc[df['fold'] == '5']
+    df_test = df_test.reset_index(drop=True)
 
+    return df_train,df_test
+
+def get_corpus(df):
+    """
+    creat a corpus from Dataframe
+
+    :param df : Dataframe. Data from read_data()
+
+    return corpus : list
+
+    """
+    corpus = []
+    for i in range(0,len(df)):
+        corpus.append(df.loc[i,'text'])
+    return corpus
+
+def TF_IDF(df_train,df_test):
+    """
+    Extracting features
+    Term Frequency X Inverse Document Frequency.
+
+    :param df : Dataframe. Data from read_data()
+
+    return df : TYPE. DESCRIPTION.
+
+    """
+    corpus_train = get_corpus(df_train)
+    corpus_test = get_corpus(df_test)
+# Extracting features from the training data using a sparse vectorizer
+    vectorizer = TfidfVectorizer(stop_words='english',ngram_range=(1,2))
+    X_train = vectorizer.fit_transform(corpus_train)
+    X_train = pd.DataFrame(X_train.toarray(), columns = vectorizer.get_feature_names_out())
+
+# Extracting features from the test data using the same vectorizer
+    X_test = vectorizer.transform(corpus_test)
+    X_test = pd.DataFrame(X_test.toarray(), columns = vectorizer.get_feature_names_out())
+
+    return X_train,X_test
 
 # TODO use the algorithm to get the feature from those texts
 
@@ -72,8 +118,7 @@ def CT(x, y):
     index_best_alpha = rank_test.index(min(rank_test))
     best_alpha = betas[index_best_alpha]
     print("Best alpha: ", best_alpha)
-    
-    
+
     # with default alpha 0.0
     clf = DecisionTreeClassifier()
     x_train = list(itertools.chain.from_iterable(x[:4]))
@@ -84,7 +129,7 @@ def CT(x, y):
     y_test_pre = clf.predict(x_test)
     print('With default ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
     print(accuracy_score(y_test, y_test_pre), precision_score(y_test, y_test_pre), recall_score(y_test, y_test_pre), f1_score(y_test, y_test_pre))
-    
+
     # with best alpha
     clf = DecisionTreeClassifier(ccp_alpha = best_alpha)
     clf = clf.fit(x_train, y_train)
@@ -95,7 +140,7 @@ def CT(x, y):
 def RF(x, y, best_features, bigram = False):
     x_train = list(itertools.chain.from_iterable(x[:4]))
     y_train = list(itertools.chain.from_iterable(y[:4]))
-    
+
     # TODO select features with the use of bigram.
 
     features_range = [best_features-2, best_features, best_features+2]
@@ -120,11 +165,21 @@ def RF(x, y, best_features, bigram = False):
         best_max_features) + " features): " + str(accuracy_score(y_train, y_train_pre)))
     print("Test Accuracy Random Forest (" + str(
         best_max_features) + " features): " + str(accuracy_score(y_test, y_test_pre)))
-    
+
+
 path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
-df = read_data(path)
-print(df)
-    
-    
-    
-        
+if ~os.path.exists(path):
+    path = 'Assignment_2/op_spam_v1.4/negative_polarity'
+df_train,df_test = read_data(path)
+
+# print(df['fold'])
+
+y_train = df_train['label']
+y_test = df_test['label']
+
+X_train,X_test = TF_IDF(df_train,df_test)
+
+
+
+
+
