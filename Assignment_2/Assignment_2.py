@@ -86,7 +86,23 @@ def TF_IDF(df_train,df_test,ngram_range=(1,2)):
 
     return X_train,X_test
 
-# TODO use the algorithm to get the feature from those texts
+def data_preprocessing(path,ngram_range=(1,2)):
+    df_train,df_test = read_data(path)
+
+    y_train = np.array(df_train['label'])
+    y_test = np.array(df_test['label'])
+
+    X_train,X_test = TF_IDF(df_train,df_test,ngram_range=ngram_range)
+
+    print("The number of training set",X_train.shape[0])
+    print("The number of test set",X_test.shape[0])
+    print("The number of extracted features",X_train.shape[1])
+
+    X_train = np.array(X_train)
+    X_test = np.array(X_test)
+
+    return X_train,y_train,X_test,y_test
+
 
 #def MNB():
     # TODO fine-tune tehe hyper-parameter 'The number of those features'
@@ -166,22 +182,7 @@ def RF(x, y, best_features, bigram = False):
     print("Test Accuracy Random Forest (" + str(
         best_max_features) + " features): " + str(accuracy_score(y_test, y_test_pre)))
 
-def data_preprocessing(path,ngram_range=(1,2)):
-    df_train,df_test = read_data(path)
 
-    y_train = np.array(df_train['label'])
-    y_test = np.array(df_test['label'])
-
-    X_train,X_test = TF_IDF(df_train,df_test,ngram_range=ngram_range)
-
-    print("The number of training set",X_train.shape[0])
-    print("The number of test set",X_test.shape[0])
-    print("The number of extracted features",X_train.shape[1])
-
-    X_train = np.array(X_train)
-    X_test = np.array(X_test)
-
-    return X_train,y_train,X_test,y_test
 
 
 path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
