@@ -67,7 +67,7 @@ def get_corpus(df):
     return corpus
 
 
-def TF_IDF(df_train, df_test, ngram_range=(1, 2)):
+def TF_IDF(df_train, df_test, ngram_range):
     """
     Extract features
     Term Frequency X Inverse Document Frequency.
@@ -93,7 +93,7 @@ def TF_IDF(df_train, df_test, ngram_range=(1, 2)):
     return X_train, X_test
 
 
-def data_preprocessing(path, ngram_range=(1, 2)):
+def data_preprocessing(path, ngram_range):
     df_train, df_test = read_data(path)
 
     y_train = np.array(df_train['label'])
@@ -101,8 +101,6 @@ def data_preprocessing(path, ngram_range=(1, 2)):
 
     X_train, X_test = TF_IDF(df_train, df_test, ngram_range=ngram_range)
 
-    print("The number of training set: ", X_train.shape[0])
-    print("The number of test set: ", X_test.shape[0])
     print("The number of extracted features: ", X_train.shape[1])
     print()
 
@@ -206,6 +204,18 @@ path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam
 if ~os.path.exists(path):
     path = 'Assignment_2/op_spam_v1.4/negative_polarity'
 
-X_train, y_train, X_test, y_test = data_preprocessing(path, ngram_range=(1, 1))
+print("Data(uni):")
+X_train_uni, y_train, X_test_uni, y_test = data_preprocessing(path, ngram_range=(1, 1))
 
-CT(X_train, y_train, X_test, y_test)
+print("Data(uni+bi):")
+X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing(path, ngram_range=(1, 2))
+
+print("The number of training set: ", len(X_train_uni))
+print("The number of test set: ", len(X_test_uni))
+print()
+
+print("CLF without bigram features added:")
+CT(X_train_uni, y_train, X_test_uni, y_test)
+
+print("CLF with bigram features added:")
+CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
