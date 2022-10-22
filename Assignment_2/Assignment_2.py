@@ -63,7 +63,7 @@ def get_corpus(df):
         corpus.append(df.loc[i,'text'])
     return corpus
 
-def TF_IDF(df_train,df_test):
+def TF_IDF(df_train,df_test,ngram_range=(1,2)):
     """
     Extracting features
     Term Frequency X Inverse Document Frequency.
@@ -76,7 +76,7 @@ def TF_IDF(df_train,df_test):
     corpus_train = get_corpus(df_train)
     corpus_test = get_corpus(df_test)
 # Extracting features from the training data using a sparse vectorizer
-    vectorizer = TfidfVectorizer(stop_words='english',ngram_range=(1,2))
+    vectorizer = TfidfVectorizer(stop_words='english',ngram_range=ngram_range)
     X_train = vectorizer.fit_transform(corpus_train)
     X_train = pd.DataFrame(X_train.toarray(), columns = vectorizer.get_feature_names_out())
 
@@ -98,11 +98,11 @@ def TF_IDF(df_train,df_test):
     # TODO Implement the function for the regularized logistic regression.
     # TODO Test the different score with the default parameter and best parameter.
     
-def CT(x, y):
+def CT(x_train,y_train,x_test,y_test):
     # calculate the alpha
     clf = DecisionTreeClassifier()
-    x_train = list(itertools.chain.from_iterable(x[:4]))
-    y_train = list(itertools.chain.from_iterable(y[:4]))
+    # x_train = list(itertools.chain.from_iterable(x[:4]))
+    # y_train = list(itertools.chain.from_iterable(y[:4]))
     alphas = clf.cost_complexity_pruning_path(x_train, y_train)["ccp_alphas"]
     betas = list()
     for i, a in enumerate(alphas[:-1]):
@@ -121,10 +121,10 @@ def CT(x, y):
 
     # with default alpha 0.0
     clf = DecisionTreeClassifier()
-    x_train = list(itertools.chain.from_iterable(x[:4]))
-    y_train = list(itertools.chain.from_iterable(y[:4]))
-    x_test = x[4]
-    y_test = y[4]
+    # x_train = list(itertools.chain.from_iterable(x[:4]))
+    # y_train = list(itertools.chain.from_iterable(y[:4]))
+    # x_test = x[4]
+    # y_test = y[4]
     clf = clf.fit(x_train, y_train)
     y_test_pre = clf.predict(x_test)
     print('With default ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
@@ -166,20 +166,29 @@ def RF(x, y, best_features, bigram = False):
     print("Test Accuracy Random Forest (" + str(
         best_max_features) + " features): " + str(accuracy_score(y_test, y_test_pre)))
 
+def data_preprocessing(path,ngram_range=(1,2)):
+    df_train,df_test = read_data(path)
+
+    y_train = np.array(df_train['label'])
+    y_test = np.array(df_test['label'])
+
+    X_train,X_test = TF_IDF(df_train,df_test,ngram_range=ngram_range)
+
+    print("The number of training set",X_train.shape[0])
+    print("The number of test set",X_test.shape[0])
+    print("The number of extracted features",X_train.shape[1])
+
+    X_train = np.array(X_train)
+    X_test = np.array(X_test)
+
+    return X_train,y_train,X_test,y_test
+
 
 path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
 if ~os.path.exists(path):
     path = 'Assignment_2/op_spam_v1.4/negative_polarity'
-df_train,df_test = read_data(path)
 
-# print(df['fold'])
-
-y_train = df_train['label']
-y_test = df_test['label']
-
-X_train,X_test = TF_IDF(df_train,df_test)
+X_train,y_train,X_test,y_test = data_preprocessing(path,ngram_range=(1,1))
 
 
-
-
-
+CT(X_train,y_train,X_test,y_test)
