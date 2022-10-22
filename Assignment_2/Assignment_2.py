@@ -21,6 +21,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from mlxtend.evaluate import mcnemar, mcnemar_table
+from scipy.stats import chisquare
 from sklearn.model_selection import GridSearchCV
 
 
@@ -110,7 +112,7 @@ def data_preprocessing(path, ngram_range):
     return X_train, y_train, X_test, y_test
 
 # def MNB():
-    # TODO fine-tune tehe hyper-parameter 'The number of those features'
+    # TODO fine-tune the hyper-parameter 'The number of those features'
     # TODO Implement the function for the Multinomial Naive Bayes.
     # TODO Test the different score with the default parameter and best parameter.
 
@@ -199,6 +201,14 @@ def RF(x, y, best_features, bigram=False):
     print("Test Accuracy Random Forest (" + str(
         best_max_features) + " features): " + str(accuracy_score(y_test, y_test_pre)))
 
+def mcnemar_4_diff_models(y_test, y_pred_1, y_pred_2):
+    # Significant test for different models
+    tb_1 = mcnemar_table(y_test, y_pred_1, y_pred_2)
+    chi, p = mcnemar(tb_1)
+
+    print('chi-squared:', chi)
+    print('p-value:', p)
+
 
 path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
 if ~os.path.exists(path):
@@ -219,3 +229,4 @@ CT(X_train_uni, y_train, X_test_uni, y_test)
 
 print("CLF with bigram features added:")
 CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+
