@@ -5,7 +5,9 @@ Created on Sun Oct  9 16:16:40 2022
 @author: Xinhao Lan
 """
 import pandas as pd
+import numpy as np
 import os
+import itertools
 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -13,6 +15,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import GridSearchCV
 
 def read_data(path):
     """
@@ -39,12 +42,12 @@ def read_data(path):
 
 # TODO use the algorithm to get the feature from those texts
 
-def MNB():
+#def MNB():
     # TODO fine-tune tehe hyper-parameter 'The number of those features'
     # TODO Implement the function for the Multinomial Naive Bayes.
     # TODO Test the different score with the default parameter and best parameter.
     
-def RLR():
+#def RLR():
     # TODO fine-tune the hyper-parameter λ (or C = 1/λ).
     # TODO Implement the function for the regularized logistic regression.
     # TODO Test the different score with the default parameter and best parameter.
@@ -94,7 +97,29 @@ def RF(x, y, best_features, bigram = False):
     y_train = list(itertools.chain.from_iterable(y[:4]))
     
     # TODO select features with the use of bigram.
-    
+
+    features_range = [best_features-2, best_features, best_features+2]
+# features_range = [20, 40, 50, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 80, 100, 120]        
+    parameters = {'max_features': features_range}                   # 'n_estimators': [1000] fixed
+    optimized_forest = RandomForestClassifier(n_estimators=1000)
+    clf_test = GridSearchCV(optimized_forest, parameters, cv=4)
+    clf_test.fit(x_train, y_train)
+    rank_test = (clf_test.cv_results_['rank_test_score']).tolist()
+    index = rank_test.index(min(rank_test))
+    best_parameters = clf_test.cv_results_["params"][index]
+    best_max_features = best_parameters["max_features"]
+    for i, p in enumerate(clf_test.cv_results_["params"]):
+        print("n features = ", p["max_features"], "\tavg_accuracy =", clf_test.cv_results_["mean_test_score"][i], "\tstd_accuracy =", clf_test.cv_results_["std_test_score"][i] )
+    clf = RandomForestClassifier(n_estimators=1000, max_features=best_max_features)
+    x_test = x[4]
+    y_test = y[4]
+    clf = clf.fit(x_train, y_train)
+    y_test_pre = clf.predict(x_test)
+    y_train_pre = clf.predict(x_train)
+    print("Training Accuracy Random Forest ("  + str(
+        best_max_features) + " features): " + str(accuracy_score(y_train, y_train_pre)))
+    print("Test Accuracy Random Forest (" + str(
+        best_max_features) + " features): " + str(accuracy_score(y_test, y_test_pre)))
     
 path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
 df = read_data(path)
