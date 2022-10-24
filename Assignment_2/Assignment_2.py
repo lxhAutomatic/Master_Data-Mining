@@ -164,15 +164,17 @@ def MNB(x_train, y_train, x_test, y_test):
 
     nb_new = MultinomialNB(alpha = multinomial_nb_grid.best_params_['alpha'])
     nb_new.fit(x_train, y_train)
-    y_test_pre = nb_new.predict(x_test)
+    y_test_pre_best = nb_new.predict(x_test)
 
     print('With best alpha of in Multinomial Naive Bayes:')
-    print(classification_report(y_test, y_test_pre))
+    print(classification_report(y_test, y_test_pre_best))
     print()
     important_features(nb_new)
     print()
     print("done in %0.3fs." % (time() - t0))
     print()
+
+    return y_test_pre, y_test_pre_best
 
 # def RLR():
     # TODO fine-tune the hyper-parameter λ (or C = 1/λ).
@@ -213,15 +215,16 @@ def CT(x_train, y_train, x_test, y_test):
     # with best alpha
     clf = DecisionTreeClassifier(ccp_alpha=best_alpha)
     clf = clf.fit(x_train, y_train)
-    y_test_pre = clf.predict(x_test)
+    y_test_pre_best = clf.predict(x_test)
     # print('With best ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
     # print(accuracy_score(y_test, y_test_pre), precision_score(y_test, y_test_pre),
     #     recall_score(y_test, y_test_pre), f1_score(y_test, y_test_pre))
     print('With best ccp_alpha in classification tree:')
-    print(classification_report(y_test, y_test_pre))
+    print(classification_report(y_test, y_test_pre_best))
     print()
     print("done in %0.3fs." % (time() - t0))
     print()
+    return y_test_pre,y_test_pre_best
 
 
 def RF(x_train, y_train, x_test, y_test, best_features):
@@ -247,6 +250,7 @@ def RF(x_train, y_train, x_test, y_test, best_features):
         best_max_features) + " features): " + str(accuracy_score(y_train, y_train_pre)))
     print("Test Accuracy Random Forest (" + str(
         best_max_features) + " features): " + str(accuracy_score(y_test, y_test_pre)))
+    return y_train_pre
 
 def mcnemar_4_diff_models(y_test, y_pred_1, y_pred_2):
     # Significant test for different models
@@ -273,9 +277,13 @@ print("The number of test set: ", len(X_test_uni))
 print()
 
 # print("CLF without bigram features added:")
-# CT(X_train_uni, y_train, X_test_uni, y_test)
-
+# y_test_pre_uni, y_test_pre_uni_best = CT(X_train_uni, y_train, X_test_uni, y_test)
 # print("CLF with bigram features added:")
-# CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
-# print(len([0.1,]* len(X_train_uni[0,])))
-MNB(X_train_uni, y_train, X_test_uni, y_test)
+# y_test_pre_uni_bi, y_test_pre_uni_bi_best = CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+
+print("MNB without bigram features added:")
+y_test_pre_uni, y_test_pre_uni_best = MNB(X_train_uni, y_train, X_test_uni, y_test)
+print("MNB with bigram features added:")
+y_test_pre_uni_bi, y_test_pre_uni_bi_best = MNB(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
