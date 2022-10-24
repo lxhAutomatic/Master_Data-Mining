@@ -2,7 +2,7 @@
 """
 Created on Sun Oct  9 16:16:40 2022
 
-@author: Xinhao Lan
+@author: Xinhao Lan, Yanming Li
 """
 from audioop import avg
 from matplotlib.pyplot import text
@@ -16,6 +16,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegressionCV
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -25,7 +26,6 @@ from mlxtend.evaluate import mcnemar, mcnemar_table
 from scipy.stats import chisquare
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
-
 
 def read_data(path):
     """
@@ -54,7 +54,6 @@ def read_data(path):
 
     return df_train, df_test
 
-
 def get_corpus(df):
     """
     creat a corpus from Dataframe
@@ -68,7 +67,6 @@ def get_corpus(df):
     for i in range(0, len(df)):
         corpus.append(df.loc[i, 'text'])
     return corpus
-
 
 def TF_IDF(df_train, df_test, ngram_range):
     """
@@ -95,7 +93,6 @@ def TF_IDF(df_train, df_test, ngram_range):
 
     return X_train, X_test
 
-
 def data_preprocessing(path, ngram_range):
     df_train, df_test = read_data(path)
 
@@ -115,13 +112,7 @@ def data_preprocessing(path, ngram_range):
 
     return X_train, y_train, X_test, y_test
 
-# def MNB():
-    # TODO fine-tune the hyper-parameter 'The number of those features'
-    # TODO Implement the function for the Multinomial Naive Bayes.
-    # TODO Test the different score with the default parameter and best parameter.
-
-
-def important_features(classifier,n=5):
+def important_features_4_MNB(classifier,n=5):
     class_labels = classifier.classes_
     feature_names = classifier.feature_names_in_
 
@@ -139,6 +130,23 @@ def important_features(classifier,n=5):
     for coef, feat in topn_class2:
         print(class_labels[1], coef, feat)
 
+def important_features_4_RLR(X_train,model,n=5):
+    importances = pd.DataFrame(data={
+        'Attribute': X_train.columns,
+        'Importance': model.coef_[0]
+    })
+    importances = importances.sort_values(by='Importance', ascending=True)
+    print("Important words in negative reviews")
+    print(importances.head(n))
+    importances = pd.DataFrame(data={
+        'Attribute': X_train.columns,
+        'Importance': model.coef_[0]
+    })
+    importances = importances.sort_values(by='Importance', ascending=False)
+    importances = importances
+    print("Important words in positive reviews")
+    print(importances.head(n))
+
 def MNB(x_train, y_train, x_test, y_test):
     t0 = time()
     print("Generating Multinomial Naive Bayes...")
@@ -149,7 +157,7 @@ def MNB(x_train, y_train, x_test, y_test):
     print('With default alpha(1.0) in Multinomial Naive Bayes:')
     print(classification_report(y_test, y_test_pre))
     print()
-    important_features(nb)
+    important_features_4_MNB(nb)
 
     params = {'alpha': [0.01, 0.1, 0.5, 0.7, 1.0, 10.0, ],
             }
@@ -169,18 +177,32 @@ def MNB(x_train, y_train, x_test, y_test):
     print('With best alpha of in Multinomial Naive Bayes:')
     print(classification_report(y_test, y_test_pre_best))
     print()
-    important_features(nb_new)
+    important_features_4_MNB(nb_new)
     print()
     print("done in %0.3fs." % (time() - t0))
     print()
 
     return y_test_pre, y_test_pre_best
 
-# def RLR():
-    # TODO fine-tune the hyper-parameter λ (or C = 1/λ).
-    # TODO Implement the function for the regularized logistic regression.
-    # TODO Test the different score with the default parameter and best parameter.
+def RLR(x_train, y_train, x_test, y_test):
+    t0 = time()
+    clf = LogisticRegression().fit(x_train,y_train)
+    y_test_pre = clf.predict(x_test)
+    print('Without best 1/lambda in Regularized Logistic Regression:')
+    # print(clf.get_params())
+    print(classification_report(y_test, y_test_pre))
+    print('1/lambda: {}\n'.format(clf.get_params()['C']))
+    important_features_4_RLR(x_train,clf)
 
+    clf = LogisticRegressionCV(cv=5, random_state=0).fit(x_train,y_train)
+    y_test_pre_best = clf.predict(x_test)
+    print('With best 1/lambda in Regularized Logistic Regression:')
+    print(classification_report(y_test, y_test_pre_best))
+    print('1/lambda: {}\n'.format(clf.get_params()['Cs']))
+    print()
+    print("done in %0.3fs." % (time() - t0))
+    print()
+    return y_test_pre,y_test_pre_best
 
 def CT(x_train, y_train, x_test, y_test):
     t0 = time()
@@ -226,7 +248,6 @@ def CT(x_train, y_train, x_test, y_test):
     print()
     return y_test_pre,y_test_pre_best
 
-
 def RF(x_train, y_train, x_test, y_test, best_features):
     features_range = [best_features-2, best_features, best_features+2]
     # 'n_estimators': [1000] fixed
@@ -256,11 +277,8 @@ def mcnemar_4_diff_models(y_test, y_pred_1, y_pred_2):
     # Significant test for different models
     tb_1 = mcnemar_table(y_test, y_pred_1, y_pred_2)
     chi, p = mcnemar(tb_1)
-
     print('chi-squared:', chi)
     print('p-value:', p)
-
-
 
 path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
 if ~os.path.exists(path):
@@ -282,8 +300,14 @@ print()
 # y_test_pre_uni_bi, y_test_pre_uni_bi_best = CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
 # mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
 
-print("MNB without bigram features added:")
-y_test_pre_uni, y_test_pre_uni_best = MNB(X_train_uni, y_train, X_test_uni, y_test)
-print("MNB with bigram features added:")
-y_test_pre_uni_bi, y_test_pre_uni_bi_best = MNB(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# print("MNB without bigram features added:")
+# y_test_pre_uni, y_test_pre_uni_best = MNB(X_train_uni, y_train, X_test_uni, y_test)
+# print("MNB with bigram features added:")
+# y_test_pre_uni_bi, y_test_pre_uni_bi_best = MNB(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+
+print("RLR without bigram features added:")
+y_test_pre_uni, y_test_pre_uni_best = RLR(X_train_uni, y_train, X_test_uni, y_test)
+print("RLR with bigram features added:")
+y_test_pre_uni_bi, y_test_pre_uni_bi_best = RLR(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
 mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
