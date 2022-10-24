@@ -9,7 +9,6 @@ from matplotlib.pyplot import text
 import pandas as pd
 import numpy as np
 import os
-import itertools
 from time import time
 
 from sklearn.tree import DecisionTreeClassifier
@@ -301,16 +300,20 @@ def RF(x_train, y_train, x_test, y_test, best_features):
     for i, p in enumerate(clf_test.cv_results_["params"]):
         print("n features = ", p["max_features"], "\tavg_accuracy =", clf_test.cv_results_[
             "mean_test_score"][i], "\tstd_accuracy =", clf_test.cv_results_["std_test_score"][i])
-    clf = RandomForestClassifier(
-        n_estimators=1000, max_features=best_max_features)
+    
+    clf = RandomForestClassifier(n_estimators=1000)
     clf = clf.fit(x_train, y_train)
-    y_test_pre = clf.predict(x_test)
-    y_train_pre = clf.predict(x_train)
-    print("Training Accuracy Random Forest (" + str(
-        best_max_features) + " features): " + str(accuracy_score(y_train, y_train_pre)))
-    print("Test Accuracy Random Forest (" + str(
-        best_max_features) + " features): " + str(accuracy_score(y_test, y_test_pre)))
-    return y_train_pre
+    y_test_pre = clf.predict(x_test)   
+    print('With default max_features in random forest:')
+    print(classification_report(y_test, y_test_pre))
+    important_features_4_RF_N_CT(x_train,clf)
+    
+    clf = RandomForestClassifier(n_estimators=1000, max_features=best_max_features)
+    clf = clf.fit(x_train, y_train)
+    y_test_pre_best= clf.predict(x_test)
+    print('With best max_features in random forest:')
+    print(classification_report(y_test, y_test_pre_best))
+    return y_test_pre,y_test_pre_best
 
 def mcnemar_4_diff_models(y_test, y_pred_1, y_pred_2):
     # Significant test for different models
