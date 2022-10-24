@@ -24,6 +24,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from mlxtend.evaluate import mcnemar, mcnemar_table
 from scipy.stats import chisquare
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import classification_report
 
 
 def read_data(path):
@@ -98,16 +99,19 @@ def TF_IDF(df_train, df_test, ngram_range):
 def data_preprocessing(path, ngram_range):
     df_train, df_test = read_data(path)
 
-    y_train = np.array(df_train['label'])
-    y_test = np.array(df_test['label'])
+    # y_train = np.array(df_train['label'])
+    # y_test = np.array(df_test['label'])
+
+    y_train = df_train['label']
+    y_test = df_test['label']
 
     X_train, X_test = TF_IDF(df_train, df_test, ngram_range=ngram_range)
 
     print("The number of extracted features: ", X_train.shape[1])
     print()
 
-    X_train = np.array(X_train)
-    X_test = np.array(X_test)
+    # X_train = np.array(X_train)
+    # X_test = np.array(X_test)
 
     return X_train, y_train, X_test, y_test
 
@@ -115,6 +119,60 @@ def data_preprocessing(path, ngram_range):
     # TODO fine-tune the hyper-parameter 'The number of those features'
     # TODO Implement the function for the Multinomial Naive Bayes.
     # TODO Test the different score with the default parameter and best parameter.
+
+
+def important_features(classifier,n=5):
+    class_labels = classifier.classes_
+    feature_names = classifier.feature_names_in_
+
+    topn_class1 = sorted(zip(classifier.feature_count_[0], feature_names),reverse=True)[:n]
+    topn_class2 = sorted(zip(classifier.feature_count_[1], feature_names),reverse=True)[:n]
+
+    print("Important words in negative reviews")
+
+    for coef, feat in topn_class1:
+        print(class_labels[0], coef, feat)
+
+    print("-----------------------------------------")
+    print("Important words in positive reviews")
+
+    for coef, feat in topn_class2:
+        print(class_labels[1], coef, feat)
+
+def MNB(x_train, y_train, x_test, y_test):
+    t0 = time()
+    print("Generating Multinomial Naive Bayes...")
+    print()
+    nb = MultinomialNB()
+    nb.fit(x_train, y_train)
+    y_test_pre = nb.predict(x_test)
+    print('With default alpha(1.0) in Multinomial Naive Bayes:')
+    print(classification_report(y_test, y_test_pre))
+    print()
+    important_features(nb)
+
+    params = {'alpha': [0.01, 0.1, 0.5, 0.7, 1.0, 10.0, ],
+            }
+
+    multinomial_nb_grid = GridSearchCV(MultinomialNB(), param_grid=params, n_jobs=-1, cv=5, verbose=5)
+    multinomial_nb_grid.fit(x_train,y_train)
+
+    print('Best Accuracy Through Grid Search : {:.3f}'.format(multinomial_nb_grid.best_score_))
+    print('Best Parameters : {}\n'.format(multinomial_nb_grid.best_params_))
+
+    # y_test_pre = multinomial_nb_grid.predict(x_test)
+
+    nb_new = MultinomialNB(alpha = multinomial_nb_grid.best_params_['alpha'])
+    nb_new.fit(x_train, y_train)
+    y_test_pre = nb_new.predict(x_test)
+
+    print('With best alpha of in Multinomial Naive Bayes:')
+    print(classification_report(y_test, y_test_pre))
+    print()
+    important_features(nb_new)
+    print()
+    print("done in %0.3fs." % (time() - t0))
+    print()
 
 # def RLR():
     # TODO fine-tune the hyper-parameter λ (or C = 1/λ).
@@ -147,17 +205,20 @@ def CT(x_train, y_train, x_test, y_test):
     clf = DecisionTreeClassifier()
     clf = clf.fit(x_train, y_train)
     y_test_pre = clf.predict(x_test)
-    print('With default ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
-    print(accuracy_score(y_test, y_test_pre), precision_score(y_test, y_test_pre),
-        recall_score(y_test, y_test_pre), f1_score(y_test, y_test_pre))
-
+    # print('With default ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
+    # print(accuracy_score(y_test, y_test_pre), precision_score(y_test, y_test_pre),
+    #     recall_score(y_test, y_test_pre), f1_score(y_test, y_test_pre))
+    print('With default ccp_alpha in classification tree:')
+    print(classification_report(y_test, y_test_pre))
     # with best alpha
     clf = DecisionTreeClassifier(ccp_alpha=best_alpha)
     clf = clf.fit(x_train, y_train)
     y_test_pre = clf.predict(x_test)
-    print('With best ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
-    print(accuracy_score(y_test, y_test_pre), precision_score(y_test, y_test_pre),
-        recall_score(y_test, y_test_pre), f1_score(y_test, y_test_pre))
+    # print('With best ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
+    # print(accuracy_score(y_test, y_test_pre), precision_score(y_test, y_test_pre),
+    #     recall_score(y_test, y_test_pre), f1_score(y_test, y_test_pre))
+    print('With best ccp_alpha in classification tree:')
+    print(classification_report(y_test, y_test_pre))
     print()
     print("done in %0.3fs." % (time() - t0))
     print()
@@ -196,6 +257,7 @@ def mcnemar_4_diff_models(y_test, y_pred_1, y_pred_2):
     print('p-value:', p)
 
 
+
 path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
 if ~os.path.exists(path):
     path = 'Assignment_2/op_spam_v1.4/negative_polarity'
@@ -210,9 +272,11 @@ print("The number of training set: ", len(X_train_uni))
 print("The number of test set: ", len(X_test_uni))
 print()
 
-print("CLF without bigram features added:")
-CT(X_train_uni, y_train, X_test_uni, y_test)
+# print("CLF without bigram features added:")
+# CT(X_train_uni, y_train, X_test_uni, y_test)
 
-print("CLF with bigram features added:")
-CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# print("CLF with bigram features added:")
+# CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# print(len([0.1,]* len(X_train_uni[0,])))
 
+MNB(X_train_uni, y_train, X_test_uni, y_test)
