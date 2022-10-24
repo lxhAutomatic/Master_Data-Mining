@@ -26,6 +26,8 @@ from mlxtend.evaluate import mcnemar, mcnemar_table
 from scipy.stats import chisquare
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
+import shap
+import matplotlib.pyplot as plt
 
 def read_data(path):
     """
@@ -147,6 +149,42 @@ def important_features_4_RLR(X_train,model,n=5):
     print("Important words in positive reviews")
     print(importances.head(n))
 
+def important_features_4_RF_N_CT(X_train,model,n=5):
+    explainer = shap.TreeExplainer(model,X_train)
+    shap_values = explainer.shap_values(X_train)
+    plt.figure(1)
+    shap.summary_plot(shap_values=shap_values[0],
+                features=X_train,
+                feature_names=X_train.columns,
+                plot_type='bar',
+                max_display = n,
+                title = "Important words in negative reviews",
+                show=False
+                )
+    plt.title("Important words in negative reviews")
+    plt.show()
+
+    plt.figure(2)
+    shap.summary_plot(shap_values=shap_values[1],
+                features=X_train,
+                feature_names=X_train.columns,
+                plot_type='bar',
+                max_display = n,
+                title = "Important words in positive reviews",
+                show=False
+                )
+    plt.title("Important words in positive reviews")
+    plt.show()
+
+    # shap.summary_plot(shap_values=shap_values,
+    #             features=X_train,
+    #             feature_names=X_train.columns,
+    #             plot_type='bar',
+    #             max_display = n,
+    #             title = "Important words"
+    #             )
+
+
 def MNB(x_train, y_train, x_test, y_test):
     t0 = time()
     print("Generating Multinomial Naive Bayes...")
@@ -234,6 +272,7 @@ def CT(x_train, y_train, x_test, y_test):
     #     recall_score(y_test, y_test_pre), f1_score(y_test, y_test_pre))
     print('With default ccp_alpha in classification tree:')
     print(classification_report(y_test, y_test_pre))
+    important_features_4_RF_N_CT(x_train,clf)
     # with best alpha
     clf = DecisionTreeClassifier(ccp_alpha=best_alpha)
     clf = clf.fit(x_train, y_train)
@@ -306,8 +345,8 @@ print()
 # y_test_pre_uni_bi, y_test_pre_uni_bi_best = MNB(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
 # mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
 
-print("RLR without bigram features added:")
-y_test_pre_uni, y_test_pre_uni_best = RLR(X_train_uni, y_train, X_test_uni, y_test)
-print("RLR with bigram features added:")
-y_test_pre_uni_bi, y_test_pre_uni_bi_best = RLR(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
-mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+# print("RLR without bigram features added:")
+# y_test_pre_uni, y_test_pre_uni_best = RLR(X_train_uni, y_train, X_test_uni, y_test)
+# print("RLR with bigram features added:")
+# y_test_pre_uni_bi, y_test_pre_uni_bi_best = RLR(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
