@@ -158,6 +158,7 @@ def TF_IDF_new(df_train, df_test, ngram_range):
     return X_train, X_test
 
 def data_preprocessing_new(path, ngram_range):
+    # This function is only for RF
     df_train, df_test = read_data(path)
 
     # y_train = np.array(df_train['label'])
@@ -410,7 +411,6 @@ X_train_uni, y_train, X_test_uni, y_test = data_preprocessing_new(path, ngram_ra
 
 print("Data(uni+bi):")
 X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing_new(path, ngram_range=(1, 2))
-
 
 # print("CLF without bigram features added:")
 # y_test_pre_uni, y_test_pre_uni_best = CT(X_train_uni, y_train, X_test_uni, y_test)
