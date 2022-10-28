@@ -300,14 +300,14 @@ def RF(x_train, y_train, x_test, y_test, best_features):
     for i, p in enumerate(clf_test.cv_results_["params"]):
         print("n features = ", p["max_features"], "\tavg_accuracy =", clf_test.cv_results_[
             "mean_test_score"][i], "\tstd_accuracy =", clf_test.cv_results_["std_test_score"][i])
-    
+
     clf = RandomForestClassifier(n_estimators=1000)
     clf = clf.fit(x_train, y_train)
-    y_test_pre = clf.predict(x_test)   
+    y_test_pre = clf.predict(x_test)
     print('With default max_features in random forest:')
     print(classification_report(y_test, y_test_pre))
     important_features_4_RF_N_CT(x_train,clf)
-    
+
     clf = RandomForestClassifier(n_estimators=1000, max_features=best_max_features)
     clf = clf.fit(x_train, y_train)
     y_test_pre_best= clf.predict(x_test)
@@ -323,7 +323,7 @@ def mcnemar_4_diff_models(y_test, y_pred_1, y_pred_2):
     print('p-value:', p)
 
 path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam_v1.4/negative_polarity'
-if ~os.path.exists(path):
+if not os.path.exists(path):
     path = 'Assignment_2/op_spam_v1.4/negative_polarity'
 
 print("Data(uni):")
