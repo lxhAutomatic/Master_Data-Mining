@@ -113,6 +113,75 @@ def data_preprocessing(path, ngram_range):
 
     return X_train, y_train, X_test, y_test
 
+
+def TF_IDF_new(df_train, df_test, ngram_range):
+    """
+    Extract features
+    Term Frequency X Inverse Document Frequency.
+
+    :param df : Dataframe. Data from read_data()
+
+    return df : TYPE. DESCRIPTION.
+
+    """
+    corpus_train = get_corpus(df_train)
+    df_train_fold1 = df_train.loc[df_train['fold'] == '1']
+    df_train_fold1 = df_train_fold1.reset_index(drop=True)
+    df_train_fold2 = df_train.loc[df_train['fold'] == '2']
+    df_train_fold2 = df_train_fold1.reset_index(drop=True)
+    df_train_fold3 = df_train.loc[df_train['fold'] == '3']
+    df_train_fold3 = df_train_fold1.reset_index(drop=True)
+    df_train_fold4 = df_train.loc[df_train['fold'] == '4']
+    df_train_fold4 = df_train_fold1.reset_index(drop=True)
+    corpus_train_fold1 = get_corpus(df_train_fold1)
+    corpus_train_fold2 = get_corpus(df_train_fold2)
+    corpus_train_fold3 = get_corpus(df_train_fold3)
+    corpus_train_fold4 = get_corpus(df_train_fold4)
+    corpus_test = get_corpus(df_test)
+# Extracting features from the training data using a sparse vectorizer
+    vectorizer = TfidfVectorizer(stop_words='english', ngram_range=ngram_range)
+    X_train = vectorizer.fit_transform(corpus_train)
+    # X_train = pd.DataFrame(
+    #     X_train.toarray(), columns=vectorizer.get_feature_names_out())
+
+    X_train_fold1 = np.array(vectorizer.transform(corpus_train_fold1))
+    X_train_fold2 = np.array(vectorizer.transform(corpus_train_fold2))
+    X_train_fold3 = np.array(vectorizer.transform(corpus_train_fold3))
+    X_train_fold4 = np.array(vectorizer.transform(corpus_train_fold4))
+    X_train = [X_train_fold1,X_train_fold2,X_train_fold3,X_train_fold4]
+
+# Extracting features from the test data using the same vectorizer
+    X_test = np.array(vectorizer.transform(corpus_test))
+    # X_test = pd.DataFrame(
+    #     X_test.toarray(), columns=vectorizer.get_feature_names_out())
+
+    return X_train, X_test
+
+def data_preprocessing_new(path, ngram_range):
+    df_train, df_test = read_data(path)
+
+    # y_train = np.array(df_train['label'])
+    # y_test = np.array(df_test['label'])
+
+    # y_train = df_train['label']
+    y_test = np.array(df_test['label'])
+
+    y_train_fold1 = np.array(df_train.loc[df_train['fold'] == '1']['label'])
+    y_train_fold2 = np.array(df_train.loc[df_train['fold'] == '2']['label'])
+    y_train_fold3 = np.array(df_train.loc[df_train['fold'] == '3']['label'])
+    y_train_fold4 = np.array(df_train.loc[df_train['fold'] == '4']['label'])
+    y_train = [y_train_fold1,y_train_fold2,y_train_fold3,y_train_fold4]
+
+    X_train, X_test = TF_IDF_new(df_train, df_test, ngram_range=ngram_range)
+
+    # print("The number of extracted features: ", X_train.shape[1])
+    print()
+
+    # X_train = np.array(X_train)
+    # X_test = np.array(X_test)
+
+    return X_train, y_train, X_test, y_test
+
 def important_features_4_MNB(classifier,n=5):
     class_labels = classifier.classes_
     feature_names = classifier.feature_names_in_
@@ -326,15 +395,22 @@ path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam
 if not os.path.exists(path):
     path = 'Assignment_2/op_spam_v1.4/negative_polarity'
 
+# print("Data(uni):")
+# X_train_uni, y_train, X_test_uni, y_test = data_preprocessing(path, ngram_range=(1, 1))
+
+# print("Data(uni+bi):")
+# X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing(path, ngram_range=(1, 2))
+
+# print("The number of training set: ", len(X_train_uni))
+# print("The number of test set: ", len(X_test_uni))
+# print()
+
 print("Data(uni):")
-X_train_uni, y_train, X_test_uni, y_test = data_preprocessing(path, ngram_range=(1, 1))
+X_train_uni, y_train, X_test_uni, y_test = data_preprocessing_new(path, ngram_range=(1, 1))
 
 print("Data(uni+bi):")
-X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing(path, ngram_range=(1, 2))
+X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing_new(path, ngram_range=(1, 2))
 
-print("The number of training set: ", len(X_train_uni))
-print("The number of test set: ", len(X_test_uni))
-print()
 
 # print("CLF without bigram features added:")
 # y_test_pre_uni, y_test_pre_uni_best = CT(X_train_uni, y_train, X_test_uni, y_test)
