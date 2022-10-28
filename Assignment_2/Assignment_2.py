@@ -357,7 +357,7 @@ def CT(x_train, y_train, x_test, y_test):
     return y_test_pre,y_test_pre_best
 
 def RF(x_train, y_train, x_test, y_test, best_features):
-    features_range = [best_features-2, best_features, best_features+2]
+    features_range = [best_features-10, best_features-8, best_features-6, best_features-4, best_features-2, best_features, best_features+2, best_features+4, best_features+6, best_features+8, best_features+10]
     # 'n_estimators': [1000] fixed
     parameters = {'max_features': features_range}
     optimized_forest = RandomForestClassifier(n_estimators=1000)
@@ -374,14 +374,15 @@ def RF(x_train, y_train, x_test, y_test, best_features):
     clf = RandomForestClassifier(n_estimators=1000)
     clf = clf.fit(x_train, y_train)
     y_test_pre = clf.predict(x_test)
-    print('With default max_features in random forest:')
+    print('With best max_features in random forest:')
     print(classification_report(y_test, y_test_pre))
     important_features_4_RF_N_CT(x_train,clf)
 
     clf = RandomForestClassifier(n_estimators=1000, max_features=best_max_features)
     clf = clf.fit(x_train, y_train)
     y_test_pre_best= clf.predict(x_test)
-    print('With best max_features in random forest:')
+    print()
+    print('With default max_features in random forest:')
     print(classification_report(y_test, y_test_pre_best))
     return y_test_pre,y_test_pre_best
 
@@ -396,28 +397,35 @@ path = 'C:/Users/75581/Documents/GitHub/UU_Data_Mining_2022/Assignment_2/op_spam
 if not os.path.exists(path):
     path = 'Assignment_2/op_spam_v1.4/negative_polarity'
 
-# print("Data(uni):")
-# X_train_uni, y_train, X_test_uni, y_test = data_preprocessing(path, ngram_range=(1, 1))
-
-# print("Data(uni+bi):")
-# X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing(path, ngram_range=(1, 2))
-
-# print("The number of training set: ", len(X_train_uni))
-# print("The number of test set: ", len(X_test_uni))
-# print()
-
 print("Data(uni):")
-X_train_uni, y_train, X_test_uni, y_test = data_preprocessing_new(path, ngram_range=(1, 1))
+X_train_uni, y_train, X_test_uni, y_test = data_preprocessing(path, ngram_range=(1, 1))
 
 print("Data(uni+bi):")
-X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing_new(path, ngram_range=(1, 2))
+X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing(path, ngram_range=(1, 2))
+y_train = y_train.astype('int64')
+y_test = y_test.astype('int64')
+print("The number of training set: ", len(X_train_uni))
+print("The number of test set: ", len(X_test_uni))
+print()
 
-# print("CLF without bigram features added:")
-# y_test_pre_uni, y_test_pre_uni_best = CT(X_train_uni, y_train, X_test_uni, y_test)
-# print("CLF with bigram features added:")
-# y_test_pre_uni_bi, y_test_pre_uni_bi_best = CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
-# mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+a_uni, b_uni, c_uni, d_uni = data_preprocessing_new(path, ngram_range=(1, 1))
+a_uni_bi, b_uni_bi, c_uni_bi, d_uni_bi = data_preprocessing_new(path, ngram_range=(1, 2))
 
+n_uni = int(np.sqrt(len(a_uni[0][0])))
+n_uni_bi = int(np.sqrt(len(a_uni_bi[0][0])))
+print("RF without bigram features added:")
+y_test_pre_uni, y_test_pre_uni_best = RF(X_train_uni, y_train, X_test_uni, y_test, n_uni)
+print("RF with bigram features added:")
+y_test_pre_uni_bi, y_test_pre_uni_bi_best = RF(X_train_uni_bi, y_train, X_test_uni_bi, y_test, n_uni_bi)
+mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+
+"""
+print("CLF without bigram features added:")
+y_test_pre_uni, y_test_pre_uni_best = CT(X_train_uni, y_train, X_test_uni, y_test)
+print("CLF with bigram features added:")
+y_test_pre_uni_bi, y_test_pre_uni_bi_best = CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+"""
 # print("MNB without bigram features added:")
 # y_test_pre_uni, y_test_pre_uni_best = MNB(X_train_uni, y_train, X_test_uni, y_test)
 # print("MNB with bigram features added:")
@@ -429,6 +437,3 @@ X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing_new(path, ng
 # print("RLR with bigram features added:")
 # y_test_pre_uni_bi, y_test_pre_uni_bi_best = RLR(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
 # mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
-
-print(X_train_uni)
-print(X_train_uni[1])
