@@ -144,14 +144,14 @@ def TF_IDF_new(df_train, df_test, ngram_range):
     # X_train = pd.DataFrame(
     #     X_train.toarray(), columns=vectorizer.get_feature_names_out())
 
-    X_train_fold1 = np.array(vectorizer.transform(corpus_train_fold1))
-    X_train_fold2 = np.array(vectorizer.transform(corpus_train_fold2))
-    X_train_fold3 = np.array(vectorizer.transform(corpus_train_fold3))
-    X_train_fold4 = np.array(vectorizer.transform(corpus_train_fold4))
+    X_train_fold1 = vectorizer.transform(corpus_train_fold1).toarray()
+    X_train_fold2 = vectorizer.transform(corpus_train_fold2).toarray()
+    X_train_fold3 = vectorizer.transform(corpus_train_fold3).toarray()
+    X_train_fold4 = vectorizer.transform(corpus_train_fold4).toarray()
     X_train = [X_train_fold1,X_train_fold2,X_train_fold3,X_train_fold4]
 
 # Extracting features from the test data using the same vectorizer
-    X_test = np.array(vectorizer.transform(corpus_test))
+    X_test = vectorizer.transform(corpus_test).toarray()
     # X_test = pd.DataFrame(
     #     X_test.toarray(), columns=vectorizer.get_feature_names_out())
 
@@ -429,3 +429,6 @@ X_train_uni_bi, y_train, X_test_uni_bi, y_test = data_preprocessing_new(path, ng
 # print("RLR with bigram features added:")
 # y_test_pre_uni_bi, y_test_pre_uni_bi_best = RLR(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
 # mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+
+print(X_train_uni)
+print(X_train_uni[1])
