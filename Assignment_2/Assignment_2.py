@@ -219,7 +219,7 @@ def important_features_4_RLR(X_train,model,n=5):
     print(importances.head(n))
 
 def important_features_4_RF_N_CT(X_train,model,n=5):
-    explainer = shap.TreeExplainer(model,X_train)
+    explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_train)
     plt.figure(1)
     shap.summary_plot(shap_values=shap_values[0],
@@ -245,13 +245,17 @@ def important_features_4_RF_N_CT(X_train,model,n=5):
     plt.title("Important words in positive reviews")
     plt.show()
 
+    # plt.figure(3)
     # shap.summary_plot(shap_values=shap_values,
     #             features=X_train,
     #             feature_names=X_train.columns,
-    #             plot_type='bar',
-    #             max_display = n,
-    #             title = "Important words"
+    #             # plot_type='bar',
+    #             # max_display = n,
+    #             title = "Important words in negative reviews",
+    #             show=False
     #             )
+    # plt.title("Important words in negative reviews")
+    # plt.show()
 
 
 def MNB(x_train, y_train, x_test, y_test):
@@ -344,14 +348,16 @@ def CT(x_train, y_train, x_test, y_test):
     print(classification_report(y_test, y_test_pre))
     important_features_4_RF_N_CT(x_train,clf)
     # with best alpha
-    clf = DecisionTreeClassifier(ccp_alpha=best_alpha)
-    clf = clf.fit(x_train, y_train)
-    y_test_pre_best = clf.predict(x_test)
+    clf_new = DecisionTreeClassifier(ccp_alpha=best_alpha)
+    clf_new = clf_new.fit(x_train, y_train)
+    y_test_pre_best = clf_new.predict(x_test)
     # print('With best ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
     # print(accuracy_score(y_test, y_test_pre), precision_score(y_test, y_test_pre),
     #     recall_score(y_test, y_test_pre), f1_score(y_test, y_test_pre))
     print('With best ccp_alpha in classification tree:')
     print(classification_report(y_test, y_test_pre_best))
+
+    important_features_4_RF_N_CT(x_train,clf_new)
     print()
     print("done in %0.3fs." % (time() - t0))
     print()
@@ -420,13 +426,13 @@ print()
 # y_test_pre_uni_bi, y_test_pre_uni_bi_best = RF(X_train_uni_bi, y_train, X_test_uni_bi, y_test, n_uni_bi)
 # mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
 
-"""
+
 print("CLF without bigram features added:")
 y_test_pre_uni, y_test_pre_uni_best = CT(X_train_uni, y_train, X_test_uni, y_test)
-print("CLF with bigram features added:")
-y_test_pre_uni_bi, y_test_pre_uni_bi_best = CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
-mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
-"""
+# print("CLF with bigram features added:")
+# y_test_pre_uni_bi, y_test_pre_uni_bi_best = CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+
 # print("MNB without bigram features added:")
 # y_test_pre_uni, y_test_pre_uni_best = MNB(X_train_uni, y_train, X_test_uni, y_test)
 # print("MNB with bigram features added:")
