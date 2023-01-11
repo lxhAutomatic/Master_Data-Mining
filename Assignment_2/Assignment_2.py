@@ -219,7 +219,7 @@ def important_features_4_RLR(X_train,model,n=5):
     print(importances.head(n))
 
 def important_features_4_RF_N_CT(X_train,model,n=5):
-    explainer = shap.TreeExplainer(model)
+    explainer = shap.TreeExplainer(model, feature_perturbation='interventional',check_additivity=False)
     shap_values = explainer.shap_values(X_train)
     plt.figure(1)
     shap.summary_plot(shap_values=shap_values[0],
@@ -367,7 +367,7 @@ def RF(x_train, y_train, x_test, y_test, best_features):
     features_range = [best_features-10, best_features-8, best_features-6, best_features-4, best_features-2, best_features, best_features+2, best_features+4, best_features+6, best_features+8, best_features+10]
     # 'n_estimators': [1000] fixed
     parameters = {'max_features': features_range}
-    optimized_forest = RandomForestClassifier(n_estimators=1000)
+    optimized_forest = RandomForestClassifier(n_estimators=1000, min_samples_leaf = 3)
     clf_test = GridSearchCV(optimized_forest, parameters, cv=4)
     clf_test.fit(x_train, y_train)
     rank_test = (clf_test.cv_results_['rank_test_score']).tolist()
@@ -378,19 +378,20 @@ def RF(x_train, y_train, x_test, y_test, best_features):
         print("n features = ", p["max_features"], "\tavg_accuracy =", clf_test.cv_results_[
             "mean_test_score"][i], "\tstd_accuracy =", clf_test.cv_results_["std_test_score"][i])
 
-    clf = RandomForestClassifier(n_estimators=1000)
+    clf = RandomForestClassifier(n_estimators=1000, min_samples_leaf = 2)
     clf = clf.fit(x_train, y_train)
     y_test_pre = clf.predict(x_test)
     print('With best max_features in random forest:')
     print(classification_report(y_test, y_test_pre))
     important_features_4_RF_N_CT(x_train,clf)
 
-    clf = RandomForestClassifier(n_estimators=1000, max_features=best_max_features)
+    clf = RandomForestClassifier(n_estimators=1000, max_features=best_max_features, min_samples_leaf = 3)
     clf = clf.fit(x_train, y_train)
     y_test_pre_best= clf.predict(x_test)
     print()
     print('With default max_features in random forest:')
     print(classification_report(y_test, y_test_pre_best))
+    important_features_4_RF_N_CT(x_train,clf)
     return y_test_pre,y_test_pre_best
 
 def mcnemar_4_diff_models(y_test, y_pred_1, y_pred_2):
@@ -420,27 +421,42 @@ print()
 
 # n_uni = int(np.sqrt(len(a_uni[0][0])))
 # n_uni_bi = int(np.sqrt(len(a_uni_bi[0][0])))
-# print("RF without bigram features added:")
-# y_test_pre_uni, y_test_pre_uni_best = RF(X_train_uni, y_train, X_test_uni, y_test, n_uni)
+# # print("RF without bigram features added:")
+# # y_test_pre_uni, RF_y_test_pre_uni_best = RF(X_train_uni, y_train, X_test_uni, y_test, n_uni)
 # print("RF with bigram features added:")
-# y_test_pre_uni_bi, y_test_pre_uni_bi_best = RF(X_train_uni_bi, y_train, X_test_uni_bi, y_test, n_uni_bi)
-# mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+# y_test_pre_uni_bi, RF_y_test_pre_uni_bi_best = RF(X_train_uni_bi, y_train, X_test_uni_bi, y_test, n_uni_bi)
+# mcnemar_4_diff_models(y_test,RF_y_test_pre_uni_best,RF_y_test_pre_uni_bi_best)
 
 
-print("CLF without bigram features added:")
-y_test_pre_uni, y_test_pre_uni_best = CT(X_train_uni, y_train, X_test_uni, y_test)
+# print("CLF without bigram features added:")
+# y_test_pre_uni, CLF_y_test_pre_uni_best = CT(X_train_uni, y_train, X_test_uni, y_test)
 # print("CLF with bigram features added:")
-# y_test_pre_uni_bi, y_test_pre_uni_bi_best = CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
-# mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+# y_test_pre_uni_bi, CLF_y_test_pre_uni_bi_best = CT(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# mcnemar_4_diff_models(CLF_y_test,y_test_pre_uni_best,CLF_y_test_pre_uni_bi_best)
 
 # print("MNB without bigram features added:")
-# y_test_pre_uni, y_test_pre_uni_best = MNB(X_train_uni, y_train, X_test_uni, y_test)
+# y_test_pre_uni, MNB_y_test_pre_uni_best = MNB(X_train_uni, y_train, X_test_uni, y_test)
 # print("MNB with bigram features added:")
-# y_test_pre_uni_bi, y_test_pre_uni_bi_best = MNB(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
-# mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+# y_test_pre_uni_bi, MNB_y_test_pre_uni_bi_best = MNB(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# mcnemar_4_diff_models(y_test,MNB_y_test_pre_uni_best,MNB_y_test_pre_uni_bi_best)
 
 # print("RLR without bigram features added:")
-# y_test_pre_uni, y_test_pre_uni_best = RLR(X_train_uni, y_train, X_test_uni, y_test)
+# y_test_pre_uni, RLR_y_test_pre_uni_best = RLR(X_train_uni, y_train, X_test_uni, y_test)
 # print("RLR with bigram features added:")
-# y_test_pre_uni_bi, y_test_pre_uni_bi_best = RLR(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
-# mcnemar_4_diff_models(y_test,y_test_pre_uni_best,y_test_pre_uni_bi_best)
+# y_test_pre_uni_bi, RLR_y_test_pre_uni_bi_best = RLR(X_train_uni_bi, y_train, X_test_uni_bi, y_test)
+# mcnemar_4_diff_models(y_test,RLR_y_test_pre_uni_best,RLR_y_test_pre_uni_bi_best)
+
+
+# print("mcnemar RLR MNB uni")
+# mcnemar_4_diff_models(y_test,RLR_y_test_pre_uni_best,MNB_y_test_pre_uni_best)
+# print("mcnemar RLR RF uni")
+# mcnemar_4_diff_models(y_test,RLR_y_test_pre_uni_best,RF_y_test_pre_uni_best)
+# print("mcnemar MNB RF uni")
+# mcnemar_4_diff_models(y_test,MNB_y_test_pre_uni_best,RF_y_test_pre_uni_best)
+
+# print("mcnemar RLR MNB uni_bi_")
+# mcnemar_4_diff_models(y_test,RLR_y_test_pre_uni_bi_best,MNB_y_test_pre_uni_bi_best)
+# print("mcnemar RLR RF uni_bi_")
+# mcnemar_4_diff_models(y_test,RLR_y_test_pre_uni_bi_best,RF_y_test_pre_uni_bi_best)
+# print("mcnemar MNB RF uni_bi_")
+# mcnemar_4_diff_models(y_test,MNB_y_test_pre_uni_bi_best,RF_y_test_pre_uni_bi_best)
