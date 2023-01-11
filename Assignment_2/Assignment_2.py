@@ -321,14 +321,14 @@ def CT(x_train, y_train, x_test, y_test):
     print("Generating classification tree...")
     print()
     # calculate the alpha
-    clf = DecisionTreeClassifier()
+    clf = DecisionTreeClassifier(splitter= "random", random_state = 1, min_samples_leaf = 2)
     alphas = clf.cost_complexity_pruning_path(x_train, y_train)["ccp_alphas"]
     betas = list()
     for i, a in enumerate(alphas[:-1]):
         betas.append(np.math.sqrt(a * alphas[i + 1]))
     betas.append(np.inf)
 
-    tree = DecisionTreeClassifier()
+    tree = DecisionTreeClassifier(splitter= "random", random_state = 1, min_samples_leaf = 2)
     parameters = {'ccp_alpha': betas}
     clf_test = GridSearchCV(tree, parameters, cv=4)
     clf_test.fit(x_train, y_train)
@@ -338,7 +338,7 @@ def CT(x_train, y_train, x_test, y_test):
     print("Best alpha: ", best_alpha)
 
     # with default alpha 0.0
-    clf = DecisionTreeClassifier()
+    clf = DecisionTreeClassifier(splitter= "random", random_state = 1, min_samples_leaf = 2)
     clf = clf.fit(x_train, y_train)
     y_test_pre = clf.predict(x_test)
     # print('With default ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
@@ -348,7 +348,7 @@ def CT(x_train, y_train, x_test, y_test):
     print(classification_report(y_test, y_test_pre))
     important_features_4_RF_N_CT(x_train,clf)
     # with best alpha
-    clf_new = DecisionTreeClassifier(ccp_alpha=best_alpha)
+    clf_new = DecisionTreeClassifier(ccp_alpha=best_alpha, splitter= "random", random_state = 1, min_samples_leaf = 2)
     clf_new = clf_new.fit(x_train, y_train)
     y_test_pre_best = clf_new.predict(x_test)
     # print('With best ccp_alpha in classification tree, accuracy, precision, recall and f1 score on test sets:')
